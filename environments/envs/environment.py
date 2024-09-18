@@ -84,6 +84,7 @@ class GridWorldEnv(gym.Env):
     
     def step(self, action):
         # Accept an action, compute the state of the environment after taking said action
+        # For multi-agent simulations, accept a list of actions, one for each agent
         # Return: (observation, reward, terminated, truncated, info)
 
         # Map the action (element of {0,1,2,3}) to the direction we walk in

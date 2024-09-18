@@ -4,7 +4,7 @@ Training agents to play American Football via Reinforcement Learning
 ## Development Roadmap
 
 ### Proof-of-Concept
- * Create 2D, rectangular grid environment
+ * ~~Create 2D, rectangular grid environment~~ (DONE)
  * Build test agent
  * Implement basic reward function
  * Visualize results
@@ -41,3 +41,7 @@ Training agents to play American Football via Reinforcement Learning
     * Agents still represented with a simple shape (square, circle)
     * Movement becomes continuous, necessitating "speed" stats for all agents
         * Contested movement also becomes continuous, instead of winner-takes-all
+ * Prompt the agents via playcall
+    * Unsure exactly how this will be implemented (change decision-making process? reward function?)
+    * Essentially refine the agent's objectives
+        * Still trying to block, get open, etc., but within the context of running a specific route, blocking scheme, etc.
