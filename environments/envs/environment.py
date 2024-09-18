@@ -6,11 +6,12 @@ from gymnasium import spaces
 class GridWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, width=57, length=124):
+    def __init__(self, render_mode=None, width=124, length=57):
+        scale_factor = 10
         self.width = width  # The width of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
         self.length = length # The length of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
-        self.window_width = 570  # The dimensions of the PyGame window
-        self.window_length = 1240
+        self.window_width = width*scale_factor  # The dimensions of the PyGame window
+        self.window_length = length*scale_factor
 
         # Observations are dictionaries with the agent's and the target's location.
         # Each location is encoded as an element of {0, ..., `size`}^2, i.e. MultiDiscrete([size, size]).
@@ -118,7 +119,7 @@ class GridWorldEnv(gym.Env):
             self.clock = pygame.time.Clock()
 
         canvas = pygame.Surface((self.window_width, self.window_length))
-        canvas.fill((255, 255, 255))
+        canvas.fill((54, 155, 44)) #Color the field green
         pix_square_size = (
             self.window_width / self.width
         )  # The size of a single grid square in pixels
@@ -141,21 +142,73 @@ class GridWorldEnv(gym.Env):
         )
 
         # Finally, add some gridlines
-        '''for x in range(self.size + 1):
+        # Gridlines are very harsh on the eyes at this scale, but useful code example for future environment beautification
+        for x in range(self.length + 1):
             pygame.draw.line(
                 canvas,
-                0,
+                (0,0,0, 0.2),
                 (0, pix_square_size * x),
-                (self.window_size, pix_square_size * x),
-                width=3,
+                (self.window_width, pix_square_size * x),
+                width=2,
             )
+        for y in range(self.width + 1):
             pygame.draw.line(
                 canvas,
-                0,
-                (pix_square_size * x, 0),
-                (pix_square_size * x, self.window_size),
-                width=3,
-            )'''
+                (0,0,0, 0.2),
+                (pix_square_size * y, 0),
+                (pix_square_size * y, self.window_length),
+                width=2,
+            )
+        # Draw sidelines
+        pygame.draw.rect(
+            canvas,
+            (255, 255, 255),
+            pygame.Rect(
+                (0, 0),
+                (pix_square_size * self.window_width, pix_square_size*2),
+            ),
+        )
+        pygame.draw.rect(
+            canvas,
+            (255, 255, 255),
+            pygame.Rect(
+                (0, self.window_length - 2*pix_square_size),
+                (pix_square_size * self.window_width, pix_square_size*2),
+            ),
+        )
+        pygame.draw.rect(
+            canvas,
+            (255, 255, 255),
+            pygame.Rect(
+                (0, 0),
+                (2*pix_square_size, pix_square_size*self.window_length),
+            ),
+        )
+        pygame.draw.rect(
+            canvas,
+            (255, 255, 255),
+            pygame.Rect(
+                (self.window_width - 2*pix_square_size, 0),
+                (2*pix_square_size, pix_square_size*self.window_length),
+            ),
+        )
+        # Draw Endzones
+        pygame.draw.rect(
+            canvas,
+            (224, 220, 226),
+            pygame.Rect(
+                (2*pix_square_size, 2*pix_square_size),
+                (10*pix_square_size, self.window_length - 4*pix_square_size),
+            ),
+        )
+        pygame.draw.rect(
+            canvas,
+            (0, 118, 182) , #Go Lions
+            pygame.Rect(
+                (self.window_width - 12*pix_square_size, 2*pix_square_size),
+                (10*pix_square_size, self.window_length - 4*pix_square_size),
+            ),
+        )
 
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
