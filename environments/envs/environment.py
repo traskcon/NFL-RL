@@ -9,7 +9,8 @@ class GridWorldEnv(gym.Env):
     def __init__(self, render_mode=None, width=57, length=124):
         self.width = width  # The width of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
         self.length = length # The length of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
-        self.window_size = 512  # The size of the PyGame window
+        self.window_width = 570  # The dimensions of the PyGame window
+        self.window_length = 1240
 
         # Observations are dictionaries with the agent's and the target's location.
         # Each location is encoded as an element of {0, ..., `size`}^2, i.e. MultiDiscrete([size, size]).
@@ -53,8 +54,8 @@ class GridWorldEnv(gym.Env):
         return {"agent": self._agent_location, "target": self._target_location}
     
     def _get_info(self):
-        # Return eulidean distance between agent and target
-        return {"distance": np.linalg.norm(self._agent_location - self._target_location, ord=2)}
+        # Return manhattan distance between agent and target
+        return {"distance": np.linalg.norm(self._agent_location - self._target_location, ord=1)}
     
     def reset(self, seed=None, options=None):
         # Reset the environment
@@ -111,15 +112,15 @@ class GridWorldEnv(gym.Env):
             pygame.init()
             pygame.display.init()
             self.window = pygame.display.set_mode(
-                (self.window_size, self.window_size)
+                (self.window_width, self.window_length)
             )
         if self.clock is None and self.render_mode == "human":
             self.clock = pygame.time.Clock()
 
-        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas = pygame.Surface((self.window_width, self.window_length))
         canvas.fill((255, 255, 255))
         pix_square_size = (
-            self.window_size / self.size
+            self.window_width / self.width
         )  # The size of a single grid square in pixels
 
         # First we draw the target
@@ -140,7 +141,7 @@ class GridWorldEnv(gym.Env):
         )
 
         # Finally, add some gridlines
-        for x in range(self.size + 1):
+        '''for x in range(self.size + 1):
             pygame.draw.line(
                 canvas,
                 0,
@@ -154,7 +155,7 @@ class GridWorldEnv(gym.Env):
                 (pix_square_size * x, 0),
                 (pix_square_size * x, self.window_size),
                 width=3,
-            )
+            )'''
 
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
@@ -169,3 +170,9 @@ class GridWorldEnv(gym.Env):
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
             )
+        
+    def close(self):
+        if self.window is not None:
+            pygame.display.quit()
+            pygame.quit()
+    
