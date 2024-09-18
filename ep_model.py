@@ -2,7 +2,7 @@ import xgboost
 import numpy as np
 
 model = xgboost.Booster()
-model.load_model('C:/Users/ctrask/Documents/NFL-RL/epa.model')
+model.load_model('./epa.model')
 
 # NFLFastR's Expected Points (EP) model is an XGBoost Classifier
 # It takes 9 variables as inputs and uses an encoding to map the string variables (and season) to boolean columns
