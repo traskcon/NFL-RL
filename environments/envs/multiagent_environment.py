@@ -8,12 +8,16 @@ from pettingzoo import ParallelEnv
 class MultiEnvironment(ParallelEnv):
     metadata = {"name":"multiagent_environment-v0"}
 
-    def __init__(self):
+    def __init__(self, render_mode=None, width=124, length=57):
         '''Initial WR-DB Coverage Battle environment
         Based on PettingZoo prison escape tutorial: https://pettingzoo.farama.org/tutorials/custom_environment/2-environment-logic/
         '''
-        self.width = 7
-        self.length = 7
+        scale_factor = 10
+        self.width = width  # The width of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
+        self.length = length # The length of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
+        self.window_width = width*scale_factor  # The dimensions of the PyGame window
+        self.window_length = length*scale_factor
+
         self.target_location = np.array([None, None])
         self.db_location = np.array([None, None])
         self.wr_location = np.array([None, None])
@@ -27,6 +31,19 @@ class MultiEnvironment(ParallelEnv):
             2: np.array([-1, 0]),
             3: np.array([0, -1]),
         }
+
+        assert render_mode is None or render_mode in self.metadata["render_modes"]
+        self.render_mode = render_mode
+
+        """
+        If human-rendering is used, `self.window` will be a reference
+        to the window that we draw to. `self.clock` will be a clock that is used
+        to ensure that the environment is rendered at the correct framerate in
+        human-mode. They will remain `None` until human-mode is used for the
+        first time.
+        """
+        self.window = None
+        self.clock = None
 
     def reset(self, seed=None, options=None):
         '''Re-initialize the environment'''
