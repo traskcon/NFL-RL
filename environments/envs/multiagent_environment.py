@@ -21,14 +21,15 @@ class MultiEnvironment(ParallelEnv):
         self.window_length = length*scale_factor
 
         self.target_location = np.array([None, None])
-        self.db_location = np.array([None, None])
-        self.wr_location = np.array([None, None])
         self.timestep = None
         self.possible_agents = ["WR", "DB"]
+        self.colormap = {"WR":(0,0,255), "DB":(255,0,0)}
 
         self.observation_spaces = dict()
         self.action_spaces = dict()
+        self.agent_locations = dict()
         for agent in self.possible_agents:
+            self.agent_locations[agent] = np.array([None, None]) # Initalize all agent locations as None
             self.observation_spaces[agent] = spaces.Box(low=np.array([0, 0]), high=np.array([width - 1, length - 1]), dtype=int)
             self.action_spaces[agent] = spaces.Discrete(4)
 
@@ -57,15 +58,14 @@ class MultiEnvironment(ParallelEnv):
         self.agents = copy(self.possible_agents)
         self.timestep = 0
 
-        self.wr_location = np.array([20, 10])
-
-        self.db_location = np.array([60, 16])
+        # TODO: Build scenario code controlling where agent initial locations are
+        self.agent_locations["WR"] = np.array([20, 10])
+        self.agent_locations["DB"] = np.array([60, 16])
 
         self.target_location = np.random.randint(25,45,2)
 
         observations = {a:(
-            self.wr_location,
-            self.db_location,
+            self.agent_locations.values(),
             self.target_location,
         ) for a in self.agents}
 
@@ -78,30 +78,23 @@ class MultiEnvironment(ParallelEnv):
         return observations, infos
 
     def step(self, actions):
-        '''Take in action for given agent, update relevant states'''
-        # Execute actions
-        wr_action = actions["WR"]
-        db_action = actions["DB"]
-
-        # Map the action (element of {0,1,2,3}) to the direction we walk in
-        wr_direction = self._action_to_direction[wr_action]
-        # We use `np.clip` to make sure we don't leave the grid
-        self.wr_location = np.clip(
-            self.wr_location + wr_direction, [0, 0], [self.width - 1, self.length - 1]
-        )
-
-        db_direction = self._action_to_direction[db_action]
-        self.db_location = np.clip(
-            self.db_location + db_direction, [0, 0], [self.width - 1, self.length - 1]
-        )
-
+        '''Set action for all agents, update relevant states'''
+        for agent in self.agents:
+            agent_action = actions[agent] # Execute action
+            agent_direction = self._action_to_direction[agent_action] #Map the action (0,1,2,3) to the direction of movement
+            # Use np.clip to ensure we don't leave the grid
+            self.agent_locations[agent] = np.clip(
+                self.agent_locations[agent] + agent_direction, [0, 0], [self.width - 1, self.length - 1]
+            )
+    
         # Check termination conditions
+        # TODO: Replace with relevant rewards, terminations
         terminations = {a: False for a in self.agents}
         rewards = {a: 0 for a in self.agents}
-        if np.array_equal(self.wr_location, self.target_location):
+        if np.array_equal(self.agent_locations["WR"], self.target_location):
             rewards = {"WR": 1, "DB": -1}
             terminations = {a: True for a in self.agents}
-        elif np.array_equal(self.wr_location, self.db_location):
+        elif np.array_equal(self.agent_locations["WR"], self.agent_locations["DB"]):
             rewards = {"WR": -1, "DB": 1}
             terminations = {a: True for a in self.agents}
         
@@ -114,8 +107,7 @@ class MultiEnvironment(ParallelEnv):
 
         # Get observations
         observations = {a: (
-            self.wr_location,
-            self.db_location,
+            self.agent_locations.values(),
             self.target_location,
         ) for a in self.agents}
 
@@ -159,21 +151,14 @@ class MultiEnvironment(ParallelEnv):
                 (pix_square_size, pix_square_size),
             ),
         )
-        # Now we draw the WR (blue)
-        pygame.draw.circle(
-            canvas,
-            (0, 0, 255),
-            (self.wr_location + 0.5) * pix_square_size,
-            pix_square_size / 3,
-        )
-        # Now we draw the DB (blue)
-        pygame.draw.circle(
-            canvas,
-            (255, 0, 0),
-            (self.db_location + 0.5) * pix_square_size,
-            pix_square_size / 3,
-        )
-
+        # Now we draw the Agents
+        for agent in self.agents:
+            pygame.draw.circle(
+                canvas,
+                self.colormap[agent],
+                (self.agent_locations[agent] + 0.5) * pix_square_size,
+                pix_square_size / 3,
+            )
         # Finally, add some gridlines
         # Gridlines are very harsh on the eyes at this scale, but useful code example for future environment beautification
         for x in range(self.length + 1):

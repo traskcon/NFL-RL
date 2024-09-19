@@ -21,7 +21,7 @@ from environments.envs import multiagent_environment
 env = multiagent_environment.MultiEnvironment(render_mode="human")
 observations, infos = env.reset()
 
-for _ in range(1000):
+while env.agents:
     # this is where you would insert your policy
     actions = {agent: env.action_space(agent).sample() for agent in env.agents}
 

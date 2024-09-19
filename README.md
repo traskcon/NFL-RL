@@ -11,7 +11,7 @@ Training agents to play American Football via Reinforcement Learning
 
 ### Initial Prototype
  * Scale-up the number of agents present
-    * Begin with adding a "DB" agent who shadows "WR" agent
+    * ~~Begin with adding a "DB" agent who shadows "WR" agent~~ (DONE)
     * Then scale to 11 agent offense
     * Finally full 22 agent game
  * Refine environment
