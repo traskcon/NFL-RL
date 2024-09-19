@@ -109,7 +109,6 @@ class GridWorldEnv(gym.Env):
             return self._render_frame()
 
     def _render_frame(self):
-        # TODO: modify to be rectangular instead of square
         if self.window is None and self.render_mode == "human":
             pygame.init()
             pygame.display.init()
