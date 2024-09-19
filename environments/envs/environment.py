@@ -1,3 +1,5 @@
+'''NOTE: SUPERCEDED BY MULTIAGENT_ENVIRONMENT'''
+
 import pygame
 import numpy as np
 import gymnasium as gym

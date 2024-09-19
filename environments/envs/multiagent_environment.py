@@ -10,13 +10,16 @@ from pettingzoo import ParallelEnv
 class MultiEnvironment(ParallelEnv):
     metadata = {"name":"multiagent_environment-v0", "render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, width=124, length=57):
+    def __init__(self, scenario, world, max_cycles, render_mode=None, width=124, length=57):
         '''Initial WR-DB Coverage Battle environment
         Based on PettingZoo prison escape tutorial: https://pettingzoo.farama.org/tutorials/custom_environment/2-environment-logic/
         '''
         scale_factor = 10
         self.width = width  # The width of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
         self.length = length # The length of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
+        self.max_cycles = max_cycles
+        self.scenario = scenario
+        self.world = world
         self.window_width = width*scale_factor  # The dimensions of the PyGame window
         self.window_length = length*scale_factor
 
@@ -100,7 +103,7 @@ class MultiEnvironment(ParallelEnv):
         
         # Check truncation conditions
         truncations = {a: False for a in self.agents}
-        if self.timestep > 100:
+        if self.timestep > self.max_cycles:
             rewards = {"WR": 0, "DB": 0}
             truncations = {"WR": True, "DB": True}
         self.timestep += 1
