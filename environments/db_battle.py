@@ -1,6 +1,5 @@
 import numpy as np
-from envs import multiagent_environment
-
+from environments.envs import multiagent_environment
 
 class raw_env(multiagent_environment):
     def __init__(self,
@@ -76,6 +75,21 @@ class Scenario():
         offensive_players = self.offensive_players(world)
         return -sum(np.sqrt(np.sum(np.square(agent.location - a.location)))
                     for a in offensive_players)
+    
+    def observation(self, agent, world):
+        # Get positions of all other entities
+        entity_pos = []
+        for entity in world.landmarks:
+            entity_pos.append(entity.location - agent.location)
+        other_pos = []
+        for other in world.agents:
+            if other is agent:
+                continue
+            other_pos.append(other.location - agent.location)
+        if not agent.defense:
+            return np.concatenate([agent.goal_a.location - agent.state.location] + entity_pos + other_pos)
+        else:
+            return np.concatenate(entity_pos + other_pos)
 
 class Entity():
     def __init__(self):
@@ -99,3 +113,5 @@ class World():
 class Landmark(Entity):
     def __init__(self):
         super().__init__()
+
+db_battle_env = raw_env()

@@ -3,6 +3,10 @@ Training agents to play American Football via Reinforcement Learning
 
 ## Development Roadmap
 
+This project will be built using the PettingZoo environment for multi-agent RL simulations, 
+however instead of following their modular scenario approach, the majority of the environmental logic will be built directly into the environment itself.
+Additional features will be offloaded to their own classes where it makes sense to do so, but this will likely follow after direct implementation.
+
 ### Proof-of-Concept
  * ~~Create 2D, rectangular grid environment~~ (DONE)
  * Build test agent
@@ -11,7 +15,7 @@ Training agents to play American Football via Reinforcement Learning
 
 ### Initial Prototype
  * Scale-up the number of agents present
-    * ~~Begin with adding a "DB" agent who shadows "WR" agent~~ (DONE)
+    * Begin with adding a "DB" agent who shadows "WR" agent
     * Then scale to 11 agent offense
     * Finally full 22 agent game
  * Refine environment
