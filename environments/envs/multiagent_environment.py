@@ -4,7 +4,7 @@ import numpy as np
 from gymnasium.spaces import Discrete, MultiDiscrete
 from gymnasium import spaces
 import pygame
-
+from environments.utils.core import Agent, Landmark, World
 from pettingzoo import ParallelEnv
 
 class MultiEnvironment(ParallelEnv):
@@ -23,16 +23,18 @@ class MultiEnvironment(ParallelEnv):
 
         self.target_location = np.array([None, None])
         self.timestep = None
+        self.world = self.make_world()
         self.possible_agents = ["WR", "DB"]
-        self.colormap = {"WR":(0,0,255), "DB":(255,0,0)}
+        self.colormap = {"WR_0":(0,0,255), "DB_0":(255,0,0)}
 
         self.observation_spaces = dict()
         self.action_spaces = dict()
         self.agent_locations = dict()
-        for agent in self.possible_agents:
-            self.agent_locations[agent] = np.array([None, None]) # Initalize all agent locations as None
-            self.observation_spaces[agent] = spaces.Box(low=np.array([0, 0]), high=np.array([width - 1, length - 1]), dtype=int)
-            self.action_spaces[agent] = spaces.Discrete(4)
+        for agent in self.world.agents:
+            agent.location = np.array([None, None])
+            self.agent_locations[agent.name] = agent.location
+            self.observation_spaces[agent.name] = spaces.Box(low=np.array([0, 0]), high=np.array([width - 1, length - 1]), dtype=int)
+            self.action_spaces[agent.name] = spaces.Discrete(4)
 
         self._action_to_direction = {
             0: np.array([1, 0]),
@@ -56,22 +58,20 @@ class MultiEnvironment(ParallelEnv):
 
     def reset(self, seed=None, options=None):
         '''Re-initialize the environment'''
-        self.agents = copy(self.possible_agents)
         self.timestep = 0
+        self.reset_world(self.world)
 
-        # TODO: Build scenario code controlling where agent initial locations are
-        self.agent_locations["WR"] = np.array([20, 10])
-        self.agent_locations["DB"] = np.array([60, 16])
+        for agent in self.world.agents:
+            self.agent_locations[agent.name] = agent.location
+        self.target_location = self.world.agents[0].goal_a.location
 
-        self.target_location = np.random.randint(25,45,2)
-
-        observations = {a:(
+        observations = {a.name:(
             self.agent_locations.values(),
             self.target_location,
-        ) for a in self.agents}
+        ) for a in self.world.agents}
 
         # Get dummy infos. Necessary for proper parallel_to_aec conversion
-        infos = {a: {} for a in self.agents}
+        infos = {a.name: {} for a in self.world.agents}
 
         if self.render_mode == "human":
             self._render_frame()
@@ -80,43 +80,38 @@ class MultiEnvironment(ParallelEnv):
 
     def step(self, actions):
         '''Set action for all agents, update relevant states'''
-        for agent in self.agents:
-            agent_action = actions[agent] # Execute action
+        for agent in self.world.agents:
+            agent_action = actions[agent.name] # Execute action
             agent_direction = self._action_to_direction[agent_action] #Map the action (0,1,2,3) to the direction of movement
             # Use np.clip to ensure we don't leave the grid
-            self.agent_locations[agent] = np.clip(
-                self.agent_locations[agent] + agent_direction, [0, 0], [self.width - 1, self.length - 1]
+            agent.location = np.clip(
+                agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
             )
+            self.agent_locations[agent.name] = agent.location
     
         # Check termination conditions
         # TODO: Replace with relevant rewards, terminations
-        terminations = {a: False for a in self.agents}
-        rewards = {a: 0 for a in self.agents}
-        if np.array_equal(self.agent_locations["WR"], self.target_location):
-            rewards = {"WR": 1, "DB": -1}
-            terminations = {a: True for a in self.agents}
-        elif np.array_equal(self.agent_locations["WR"], self.agent_locations["DB"]):
-            rewards = {"WR": -1, "DB": 1}
-            terminations = {a: True for a in self.agents}
-        
+        terminations = {a.name: False for a in self.world.agents}
+        rewards = {a.name: 0 for a in self.world.agents}
+
         # Check truncation conditions
-        truncations = {a: False for a in self.agents}
+        truncations = {a: False for a in self.world.agents}
         if self.timestep > self.max_cycles:
             rewards = {"WR": 0, "DB": 0}
             truncations = {"WR": True, "DB": True}
         self.timestep += 1
 
         # Get observations
-        observations = {a: (
+        observations = {a.name: (
             self.agent_locations.values(),
             self.target_location,
-        ) for a in self.agents}
+        ) for a in self.world.agents}
 
         # Get dummy infos
-        infos = {a: {} for a in self.agents}
+        infos = {a.name: {} for a in self.world.agents}
 
         if any(terminations.values()) or all(truncations.values()):
-            self.agents = []
+            self.world.agents = []
         
         if self.render_mode == "human":
             self._render_frame()
@@ -153,11 +148,11 @@ class MultiEnvironment(ParallelEnv):
             ),
         )
         # Now we draw the Agents
-        for agent in self.agents:
+        for agent in self.world.agents:
             pygame.draw.circle(
                 canvas,
-                self.colormap[agent],
-                (self.agent_locations[agent] + 0.5) * pix_square_size,
+                self.colormap[agent.name],
+                (agent.location + 0.5) * pix_square_size,
                 pix_square_size / 3,
             )
         # Finally, add some gridlines
@@ -250,8 +245,51 @@ class MultiEnvironment(ParallelEnv):
 
     #Define observation space
     def observation_space(self, agent):
-        return self.observation_spaces[agent]
+        return self.observation_spaces[agent.name]
     
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent):
-        return self.action_spaces[agent]
+        return self.action_spaces[agent.name]
+    
+    def make_world(self, N=2):
+        world = World()
+        num_agents = N
+        world.num_agents = num_agents
+        num_defense = N/2
+        num_landmarks = 1
+        positions = ["WR", "DB"]
+        # Add agents
+        world.agents = [Agent() for _ in range(num_agents)]
+        for i, agent in enumerate(world.agents):
+            agent.defense = True if i < num_defense else False
+            agent.position = positions[i]
+            base_index = i if i < num_defense else int(i - num_defense)
+            agent.name = f"{agent.position}_{base_index}"
+        # Add landmarks
+        world.landmarks = [Landmark() for i in range(num_landmarks)]
+        for i, landmark in enumerate(world.landmarks):
+            landmark.name = "landmark %d" % i
+            landmark.collide = False
+            landmark.movable = False
+        return world
+
+    def agent_reward(self, agent, world):
+        # Reward WR by how close they are to landmark and how far DB is from them
+        # Currently doing well = positive reward values
+        defensive_players = self.defensive_players(world)
+        def_rew = -sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
+                      for a in defensive_players)
+        off_rew = np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
+        return off_rew + def_rew
+    
+    def reset_world(self, world):
+        # Initial positions for landmark, agents
+        goal = np.random.choice(world.landmarks)
+        # Can build formations as an argument here
+        starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([60,16])}
+        for agent in world.agents:
+            agent.goal_a = goal
+            agent.location = starting_locations[agent.name]
+        for landmark in world.landmarks:
+            # Can use landmarks to design plays for agents
+            landmark.location = np.random.randint(15,45,2)
