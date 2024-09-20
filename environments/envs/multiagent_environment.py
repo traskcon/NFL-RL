@@ -14,6 +14,7 @@ class MultiEnvironment(ParallelEnv):
         '''Initial WR-DB Coverage Battle environment
         Based on PettingZoo prison escape tutorial: https://pettingzoo.farama.org/tutorials/custom_environment/2-environment-logic/
         '''
+        # Initialize parameters for field, rendering
         scale_factor = 10
         self.width = width  # The width of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
         self.length = length # The length of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
