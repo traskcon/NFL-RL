@@ -16,8 +16,8 @@ class MultiEnvironment(ParallelEnv):
         '''
         # Initialize parameters for field, rendering
         scale_factor = 10
-        self.width = width  # The width of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
-        self.length = length # The length of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
+        self.width = width  # The width of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
+        self.length = length # The length of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
         self.max_cycles = max_cycles
         self.scenario = scenario
         self.window_width = width*scale_factor  # The dimensions of the PyGame window
@@ -61,6 +61,7 @@ class MultiEnvironment(ParallelEnv):
         self.scenario.reset_world(self.world)
 
         self.rewards = {name: 0.0 for name in self.agent_names}
+        self.terminations = {name: False for name in self.agent_names}
         self.target_location = self.world.agents[0].goal_a.location
 
         observations = {a.name:(
@@ -87,15 +88,15 @@ class MultiEnvironment(ParallelEnv):
             )
     
         # Check termination conditions
-        # TODO: Replace with relevant rewards, terminations
-        terminations = {name: False for name in self.agent_names}
-        rewards = {name: 0 for name in self.agent_names}
+        for agent in self.world.agents:
+            self.rewards[agent.name] = self.scenario.reward(agent, self.world)
+            self.terminations[agent.name] = self.termination(agent)
 
         # Check truncation conditions
         truncations = {name: False for name in self.agent_names}
         if self.timestep > self.max_cycles:
-            self.rewards = {"WR": 0, "DB": 0}
-            self.truncations = {"WR": True, "DB": True}
+            self.rewards = {name: 0 for name in self.agent_names}
+            truncations = {name: True for name in self.agent_names}
         self.timestep += 1
 
         # Get observations
@@ -107,15 +108,25 @@ class MultiEnvironment(ParallelEnv):
         # Get dummy infos
         infos = {name: {} for name in self.agent_names}
 
-        if any(terminations.values()) or all(truncations.values()):
+        if any(self.terminations.values()) or all(truncations.values()):
             # If termination/truncation condition met, remove all agents
             self.world.agents = []
         
         if self.render_mode == "human":
             self._render_frame()
         
-        return observations, rewards, terminations, truncations, infos
+        return observations, self.rewards, self.terminations, truncations, infos
     
+    def termination(self, agent):
+        # Check if an offensive player has stepped out of bounds
+        # TODO: Add code checking if ballcarrier scored a touchdown
+        min_bounds = 1, 1 #min_width, min_length (zero-indexed)
+        max_bounds = self.width - 2, self.length - 2
+        if not agent.defense:
+             return ((agent.location <= min_bounds).any() or (agent.location >= max_bounds).any())
+        else:
+            return False
+
     def render(self):
         if self.render_mode == "rgb_array":
             return self._render_frame()
@@ -145,15 +156,6 @@ class MultiEnvironment(ParallelEnv):
                 (pix_square_size, pix_square_size),
             ),
         )
-        # Now we draw the Agents
-        for agent in self.world.agents:
-            pygame.draw.circle(
-                canvas,
-                self.colormap[agent.name],
-                (agent.location + 0.5) * pix_square_size,
-                pix_square_size / 3,
-            )
-        # Finally, add some gridlines
         # Gridlines are very harsh on the eyes at this scale, but useful code example for future environment beautification
         for x in range(self.length + 1):
             pygame.draw.line(
@@ -222,6 +224,15 @@ class MultiEnvironment(ParallelEnv):
             ),
         )
 
+        # Draw the Agents last to ensure they always appear
+        for agent in self.world.agents:
+            pygame.draw.circle(
+                canvas,
+                self.colormap[agent.name],
+                (agent.location + 0.5) * pix_square_size,
+                pix_square_size / 3,
+            )
+
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
             self.window.blit(canvas, canvas.get_rect())
@@ -261,7 +272,7 @@ class Scenario():
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
         for i, agent in enumerate(world.agents):
-            agent.defense = True if i < num_defense else False
+            agent.defense = False if i < num_defense else True
             agent.position = positions[i]
             base_index = i if i < num_defense else int(i - num_defense)
             agent.name = f"{agent.position}_{base_index}"
@@ -274,6 +285,18 @@ class Scenario():
             landmark.movable = False
             landmark.location = np.array([None, None])
         return world
+    
+    def reset_world(self, world):
+        # Initial positions for landmark, agents
+        goal = np.random.choice(world.landmarks)
+        # Can build formations as an argument here
+        starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([60,16])}
+        for agent in world.agents:
+            agent.goal_a = goal
+            agent.location = starting_locations[agent.name]
+        for landmark in world.landmarks:
+            # Can use landmarks to design plays for agents
+            landmark.location = np.random.randint(15,45,2)
 
     def agent_reward(self, agent, world):
         # Reward WR by how close they are to landmark and how far DB is from them
@@ -289,21 +312,16 @@ class Scenario():
         def_rew = -sum(np.sqrt(np.sum(np.square(agent.location - a.location)))
                       for a in offensive_players)
         return def_rew
+    
+    def reward(self, agent, world):
+        return (
+            self.adversary_reward(agent, world)
+            if agent.defense
+            else self.agent_reward(agent, world)
+        )
 
     def defensive_players(self, world):
         return [agent for agent in world.agents if agent.defense]
     
     def offensive_players(self, world):
         return [agent for agent in world.agents if not agent.defense]
-    
-    def reset_world(self, world):
-        # Initial positions for landmark, agents
-        goal = np.random.choice(world.landmarks)
-        # Can build formations as an argument here
-        starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([60,16])}
-        for agent in world.agents:
-            agent.goal_a = goal
-            agent.location = starting_locations[agent.name]
-        for landmark in world.landmarks:
-            # Can use landmarks to design plays for agents
-            landmark.location = np.random.randint(15,45,2)

@@ -15,6 +15,7 @@ class Agent(Entity):
        self.movable = True 
        self.defense = False
        self.position = None
+       self.ballcarrier = False
 
 class World():
     def __init__(self):
