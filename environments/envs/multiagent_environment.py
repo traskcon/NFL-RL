@@ -10,7 +10,7 @@ from pettingzoo import ParallelEnv
 class MultiEnvironment(ParallelEnv):
     metadata = {"name":"multiagent_environment-v0", "render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, max_cycles, render_mode=None, width=124, length=57):
+    def __init__(self, max_cycles, scenario, render_mode=None, width=124, length=57):
         '''Initial WR-DB Coverage Battle environment
         Based on PettingZoo prison escape tutorial: https://pettingzoo.farama.org/tutorials/custom_environment/2-environment-logic/
         '''
@@ -19,23 +19,21 @@ class MultiEnvironment(ParallelEnv):
         self.width = width  # The width of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
         self.length = length # The length of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
         self.max_cycles = max_cycles
+        self.scenario = scenario
         self.window_width = width*scale_factor  # The dimensions of the PyGame window
         self.window_length = length*scale_factor
 
         self.target_location = np.array([None, None])
         self.timestep = None
-        self.world = self.make_world()
-        self.possible_agents = ["WR", "DB"]
+        self.world = scenario.make_world()
+        self.agent_names = [agent.name for agent in self.world.agents]
         self.colormap = {"WR_0":(0,0,255), "DB_0":(255,0,0)}
 
         self.observation_spaces = dict()
         self.action_spaces = dict()
-        self.agent_locations = dict()
-        for agent in self.world.agents:
-            agent.location = np.array([None, None])
-            self.agent_locations[agent.name] = agent.location
-            self.observation_spaces[agent.name] = spaces.Box(low=np.array([0, 0]), high=np.array([width - 1, length - 1]), dtype=int)
-            self.action_spaces[agent.name] = spaces.Discrete(4)
+        for name in self.agent_names:
+            self.observation_spaces[name] = spaces.Box(low=np.array([0, 0]), high=np.array([width - 1, length - 1]), dtype=int)
+            self.action_spaces[name] = spaces.Discrete(4)
 
         self._action_to_direction = {
             0: np.array([1, 0]),
@@ -60,19 +58,18 @@ class MultiEnvironment(ParallelEnv):
     def reset(self, seed=None, options=None):
         '''Re-initialize the environment'''
         self.timestep = 0
-        self.reset_world(self.world)
+        self.scenario.reset_world(self.world)
 
-        for agent in self.world.agents:
-            self.agent_locations[agent.name] = agent.location
+        self.rewards = {name: 0.0 for name in self.agent_names}
         self.target_location = self.world.agents[0].goal_a.location
 
         observations = {a.name:(
-            self.agent_locations.values(),
+            [agent.location for agent in self.world.agents],
             self.target_location,
         ) for a in self.world.agents}
 
         # Get dummy infos. Necessary for proper parallel_to_aec conversion
-        infos = {a.name: {} for a in self.world.agents}
+        infos = {name: {} for name in self.agent_names}
 
         if self.render_mode == "human":
             self._render_frame()
@@ -88,30 +85,30 @@ class MultiEnvironment(ParallelEnv):
             agent.location = np.clip(
                 agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
             )
-            self.agent_locations[agent.name] = agent.location
     
         # Check termination conditions
         # TODO: Replace with relevant rewards, terminations
-        terminations = {a.name: False for a in self.world.agents}
-        rewards = {a.name: 0 for a in self.world.agents}
+        terminations = {name: False for name in self.agent_names}
+        rewards = {name: 0 for name in self.agent_names}
 
         # Check truncation conditions
-        truncations = {a: False for a in self.world.agents}
+        truncations = {name: False for name in self.agent_names}
         if self.timestep > self.max_cycles:
-            rewards = {"WR": 0, "DB": 0}
-            truncations = {"WR": True, "DB": True}
+            self.rewards = {"WR": 0, "DB": 0}
+            self.truncations = {"WR": True, "DB": True}
         self.timestep += 1
 
         # Get observations
         observations = {a.name: (
-            self.agent_locations.values(),
+            [agent.location for agent in self.world.agents],
             self.target_location,
         ) for a in self.world.agents}
 
         # Get dummy infos
-        infos = {a.name: {} for a in self.world.agents}
+        infos = {name: {} for name in self.agent_names}
 
         if any(terminations.values()) or all(truncations.values()):
+            # If termination/truncation condition met, remove all agents
             self.world.agents = []
         
         if self.render_mode == "human":
@@ -252,6 +249,8 @@ class MultiEnvironment(ParallelEnv):
     def action_space(self, agent):
         return self.action_spaces[agent.name]
     
+
+class Scenario():
     def make_world(self, N=2):
         world = World()
         num_agents = N
@@ -266,12 +265,14 @@ class MultiEnvironment(ParallelEnv):
             agent.position = positions[i]
             base_index = i if i < num_defense else int(i - num_defense)
             agent.name = f"{agent.position}_{base_index}"
+            agent.location = np.array([None, None])
         # Add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
             landmark.name = "landmark %d" % i
             landmark.collide = False
             landmark.movable = False
+            landmark.location = np.array([None, None])
         return world
 
     def agent_reward(self, agent, world):
