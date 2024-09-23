@@ -279,10 +279,22 @@ class Scenario():
         # Reward WR by how close they are to landmark and how far DB is from them
         # Currently doing well = positive reward values
         defensive_players = self.defensive_players(world)
-        def_rew = -sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
+        def_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                       for a in defensive_players)
-        off_rew = np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
+        off_rew = -np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
         return off_rew + def_rew
+    
+    def adversary_reward(self, agent, world):
+        offensive_players = self.offensive_players(world)
+        def_rew = -sum(np.sqrt(np.sum(np.square(agent.location - a.location)))
+                      for a in offensive_players)
+        return def_rew
+
+    def defensive_players(self, world):
+        return [agent for agent in world.agents if agent.defense]
+    
+    def offensive_players(self, world):
+        return [agent for agent in world.agents if not agent.defense]
     
     def reset_world(self, world):
         # Initial positions for landmark, agents
