@@ -1,10 +1,10 @@
-import numpy as np
-import tensorflow as tf
-from tensorflow.python import keras
-import copy
 import os
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+import numpy as np
+import keras
+import copy
 
 class Policy():
     # NOTE: Each agent should have its own policy, observations in order to minimize Q_table size 
@@ -15,7 +15,7 @@ class Policy():
         self.reward_function = env.scenario.reward
         self.models = dict()
         for agent, state in observations.items():
-            self.model[agent] = self.build_dqn(state)
+            self.models[agent] = self.build_dqn(state)
 
     def choose_action(self, agent):
         # Environment state is a tuple of n 1x2 np arrays containing each agent's position
@@ -34,7 +34,8 @@ class Policy():
         state = np.array(state)
         init = keras.initializers.HeUniform()
         model = keras.Sequential()
-        model.add(keras.layers.Dense(24, input_shape=state.shape, activation="relu",kernel_initializer=init))
+        model.add(keras.layers.Input(state.shape))
+        model.add(keras.layers.Dense(24, activation="relu",kernel_initializer=init))
         model.add(keras.layers.Dense(12, activation="relu", kernel_initializer=init))
         model.add(keras.layers.Dense(action_shape, activation="linear", kernel_initializer=init))
         model.compile(loss=keras.losses.Huber(), optimizer=keras.optimizers.Adam(learning_rate=learning_rate), metrics=["accuracy"])

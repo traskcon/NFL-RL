@@ -7,11 +7,15 @@ env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 10
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 
-while env.world.agents:
-    # this is where you would insert your policy
-    break
-    actions = {agent.name: learner.choose_action(agent) for agent in env.world.agents}
-    observations, rewards, terminations, truncations, infos = env.step(actions)
-    env.render()
+train_episodes = 300
+
+for episode in range(train_episodes):
+    observations, infos = env.reset()
+    
+    while env.world.agents:
+        # this is where you would insert your policy
+        actions = {agent.name: learner.choose_action(agent) for agent in env.world.agents}
+        observations, rewards, terminations, truncations, infos = env.step(actions)
+        #env.render()
 
 env.close()

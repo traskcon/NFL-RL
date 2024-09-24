@@ -291,6 +291,7 @@ class Scenario():
         return world
     
     def reset_world(self, world):
+        self.make_world()
         # Initial positions for landmark, agents
         goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
