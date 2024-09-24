@@ -65,7 +65,7 @@ class MultiEnvironment(ParallelEnv):
         self.target_location = self.world.agents[0].goal_a.location
 
         observations = {a.name:(
-            [agent.location for agent in self.world.agents],
+            *[agent.location for agent in self.world.agents],
             self.target_location,
         ) for a in self.world.agents}
 
@@ -89,8 +89,8 @@ class MultiEnvironment(ParallelEnv):
     
         # Check termination conditions
         for agent in self.world.agents:
-            self.rewards[agent.name] = self.scenario.reward(agent, self.world)
             self.terminations[agent.name] = self.termination(agent)
+            self.rewards[agent.name] = self.scenario.reward(agent, self.world)
 
         # Check truncation conditions
         truncations = {name: False for name in self.agent_names}
@@ -101,7 +101,7 @@ class MultiEnvironment(ParallelEnv):
 
         # Get observations
         observations = {a.name: (
-            [agent.location for agent in self.world.agents],
+            *[agent.location for agent in self.world.agents],
             self.target_location,
         ) for a in self.world.agents}
 
@@ -120,12 +120,17 @@ class MultiEnvironment(ParallelEnv):
     def termination(self, agent):
         # Check if an offensive player has stepped out of bounds
         # TODO: Add code checking if ballcarrier scored a touchdown
-        min_bounds = 1, 1 #min_width, min_length (zero-indexed)
-        max_bounds = self.width - 2, self.length - 2
         if not agent.defense:
-             return ((agent.location <= min_bounds).any() or (agent.location >= max_bounds).any())
+            self.check_bounds(agent)
+            return agent.oob
         else:
             return False
+        
+    def check_bounds(self, agent):
+        # Check if a player has stepped out of bounds
+        min_bounds = 1, 1 #min_width, min_length (zero-indexed)
+        max_bounds = self.width - 2, self.length - 2
+        agent.oob = ((agent.location <= min_bounds).any() or (agent.location >= max_bounds).any())
 
     def render(self):
         if self.render_mode == "rgb_array":
@@ -256,7 +261,6 @@ class MultiEnvironment(ParallelEnv):
     def observation_space(self, agent):
         return self.observation_spaces[agent.name]
     
-    @functools.lru_cache(maxsize=None)
     def action_space(self, agent):
         return self.action_spaces[agent.name]
     
@@ -301,11 +305,14 @@ class Scenario():
     def agent_reward(self, agent, world):
         # Reward WR by how close they are to landmark and how far DB is from them
         # Currently doing well = positive reward values
-        defensive_players = self.defensive_players(world)
-        def_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
-                      for a in defensive_players)
-        off_rew = -np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
-        return off_rew + def_rew
+        if agent.oob:
+            return -100 #Large pentalty for stepping out of bounds
+        else:
+            defensive_players = self.defensive_players(world)
+            def_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
+                        for a in defensive_players)
+            off_rew = -np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
+            return off_rew + def_rew
     
     def adversary_reward(self, agent, world):
         offensive_players = self.offensive_players(world)

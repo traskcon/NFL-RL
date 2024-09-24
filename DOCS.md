@@ -11,6 +11,8 @@ Reinforcement learning loop:
     * OPTIONAL: Log diagnostic/benchmarking information
 * Repeat the above loop for large number of plays (until agents are well-trained)
 
+The nature of our observation space and multi-agent learning means that traditional Q-Learning via a Q-Table is infeasible. While there are only 7,068 possible states for a single player, adding another player to the table increases the number of possible states up to 49,956,624. If a third entity is added as an observation (say the location of a target), the number of possible states grows to 3.5 * 10^11. 
+
 ## Code Structure
 
 testbed.py
