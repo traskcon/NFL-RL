@@ -58,6 +58,7 @@ class MultiEnvironment(ParallelEnv):
     def reset(self, seed=None, options=None):
         '''Re-initialize the environment'''
         self.timestep = 0
+        self.world = self.scenario.make_world()
         self.scenario.reset_world(self.world)
 
         self.rewards = {name: 0.0 for name in self.agent_names}
@@ -291,7 +292,6 @@ class Scenario():
         return world
     
     def reset_world(self, world):
-        self.make_world()
         # Initial positions for landmark, agents
         goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
