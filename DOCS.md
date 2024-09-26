@@ -14,6 +14,7 @@ Reinforcement learning loop:
 The nature of our observation space and multi-agent learning means that traditional Q-Learning via a Q-Table is infeasible. While there are only 7,068 possible states for a single player, adding another player to the table increases the number of possible states up to 49,956,624. If a third entity is added as an observation (say the location of a target), the number of possible states grows to 3.5 * 10^11. 
 
 Running a rendered simulation that can be viewed as it is running takes ~30 seconds to run. However the same simulation only takes about 0.01 seconds to run if rendering is turned off, making it feasible to run large numbers of simulations to train a DQN.
+Currently running 300 simulations of two agents, each with their own model (520 parameters) training every 10 simulations, takes 70 minutes to run. Further investigation is needed into how this training time scales with number of agents and model parameter count to determine if this performance is acceptable.
 
 ## Code Structure
 
