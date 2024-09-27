@@ -98,7 +98,8 @@ class MultiEnvironment(ParallelEnv):
         if self.timestep > self.max_cycles:
             self.rewards = {name: 0 for name in self.agent_names}
             truncations = {name: True for name in self.agent_names}
-        self.timestep += 1
+        self.timestep += 0.15  # Timestep of 0.1s means players are assumed to be moving at 6.67 yards/s = 20 ft/s = 13.6 mph
+        self.world.timestep += 0.15
 
         # Get observations
         observations = {a.name: (
@@ -122,8 +123,11 @@ class MultiEnvironment(ParallelEnv):
         # Check if an offensive player has stepped out of bounds
         # TODO: Add code checking if ballcarrier scored a touchdown
         if not agent.defense:
-            self.check_bounds(agent)
-            return agent.oob
+            if np.sum(np.square(agent.location - agent.goal_a.location)) == 0:
+                return True #End simulation if WR reaches target
+            else:
+                self.check_bounds(agent)
+                return agent.oob
         else:
             return False
         
@@ -274,6 +278,7 @@ class Scenario():
         num_defense = N/2
         num_landmarks = 1
         positions = ["WR", "DB"]
+        world.timestep = None
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
         for i, agent in enumerate(world.agents):
@@ -292,6 +297,7 @@ class Scenario():
         return world
     
     def reset_world(self, world):
+        world.timestep = 0
         # Initial positions for landmark, agents
         goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
@@ -310,13 +316,14 @@ class Scenario():
             return -100 #Large pentalty for stepping out of bounds
         elif np.sum(np.square(agent.location - agent.goal_a.location)) == 0:
             # If agent reaches target, give them a big reward
-            return 20
+            return 50
         else:
             defensive_players = self.defensive_players(world)
             def_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in defensive_players)
             off_rew = -np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
-            return off_rew + def_rew
+            time_penalty = -10/(1+np.exp(-world.timestep+5)) #Average NFL play lasts ~5s, motivate WR to get to target quickly
+            return off_rew + def_rew + time_penalty
     
     def adversary_reward(self, agent, world):
         offensive_players = self.offensive_players(world)
