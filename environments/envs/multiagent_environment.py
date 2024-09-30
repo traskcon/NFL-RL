@@ -318,12 +318,13 @@ class Scenario():
             # If agent reaches target, give them a big reward
             return 50
         else:
+            scale_factor = 0.1 # Scale down the continuous rewards to emphasize final reward
             defensive_players = self.defensive_players(world)
             def_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in defensive_players)
             off_rew = -np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
             time_penalty = -10/(1+np.exp(-world.timestep+5)) #Average NFL play lasts ~5s, motivate WR to get to target quickly
-            return off_rew + def_rew + time_penalty
+            return scale_factor* (off_rew + def_rew + time_penalty)
     
     def adversary_reward(self, agent, world):
         offensive_players = self.offensive_players(world)
