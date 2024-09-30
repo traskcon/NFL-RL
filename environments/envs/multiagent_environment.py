@@ -18,7 +18,7 @@ class MultiEnvironment(ParallelEnv):
         scale_factor = 10
         self.width = width  # The width of the football field grid (120 "in-bounds" + 4 "out-of-bounds")
         self.length = length # The length of the football field grid (53 "in-bounds" + 4 "out-of-bounds")
-        self.max_cycles = max_cycles
+        self.max_cycles = max_cycles * 0.15 # Convert max cycles (# of iterations) to timescale
         self.scenario = scenario
         self.window_width = width*scale_factor  # The dimensions of the PyGame window
         self.window_length = length*scale_factor
