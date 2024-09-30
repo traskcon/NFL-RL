@@ -5,6 +5,7 @@ import policy
 from collections import deque
 import time
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 scenario = multiagent_environment.Scenario()
 env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 100, render_mode=None)
@@ -18,18 +19,21 @@ min_epsilon = 0.01
 decay = 0.01
 
 replay_memory = deque(maxlen=50_000)
-
+cumulative_rewards = {agent.name: [] for agent in env.world.agents}
 
 for episode in tqdm(range(train_episodes)):
     observations, infos = env.reset()
+    for agent in env.world.agents:
+        cumulative_rewards[agent.name].append(0)
     while env.world.agents:
-        # this is where you would insert your policy
         if np.random.rand() <= epsilon:
             actions = {agent.name: env.action_space(agent).sample() for agent in env.world.agents}
         else:
             actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn") 
                        for agent in env.world.agents}
         new_observations, rewards, terminations, truncations, infos = env.step(actions)
+        for agent in env.world.agents:
+            cumulative_rewards[agent.name][-1] += rewards[agent.name]
         replay_memory.append([observations, actions, rewards, new_observations, terminations])
         if episode % 10 == 0:
             # Network training is currently quite time expensive, explore training less frequently
@@ -41,3 +45,9 @@ for episode in tqdm(range(train_episodes)):
     if episode == (train_episodes - 2):
         env.render_mode = "human"
 env.close()
+
+#Visualize cumulative rewards
+for agent, rewards in cumulative_rewards.items():
+    plt.plot(range(train_episodes), rewards, label=agent)
+plt.legend()
+plt.show()
