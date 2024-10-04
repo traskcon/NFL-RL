@@ -14,16 +14,18 @@ class Policy():
         # Environment state is a tuple of n 1x2 np arrays containing each agent's position
         self.env = env
         self.reward_function = env.scenario.reward
-        self.models = dict()
+        self.q_models = dict() # Q-Network Models for each agent
+        self.t_models = dict() # Target Network Models for each agent
         for agent, state in observations.items():
-            self.models[agent] = self.build_dqn(state)
+            self.q_models[agent] = self.build_dqn(state)
+            self.t_models[agent] = self.build_dqn(state)
 
     def choose_action(self, agent, observation=None, method="short-term"):
         # Environment state is a tuple of n 1x2 np arrays containing each agent's position
         # Initial basic decision-making policy:
         # Choose action that gives the largest reward based on the current state
         if method == "dqn":
-            model = self.models[agent.name]
+            model = self.q_models[agent.name]
             observation = np.array(observation)
             observation_reshaped = np.reshape(observation, [1, *observation.shape])
             predicted = model.predict(observation_reshaped, verbose=0).flatten()
@@ -51,9 +53,11 @@ class Policy():
         return model
     
     def train(self, replay_memory, agent):
-        model = self.models[agent]
+        ''' Train the Q-Networks '''
+        q_model = self.q_models[agent]
+        t_model = self.t_models[agent]
         learning_rate = 0.7
-        discount_factor = 0.618
+        discount_factor = 0.9
 
         MIN_REPLAY_SIZE = 1000
         if len(replay_memory) < MIN_REPLAY_SIZE:
@@ -62,23 +66,27 @@ class Policy():
         batch_size = 128
         mini_batch = random.sample(replay_memory, batch_size)
         current_states = np.array([info[0][agent] for info in mini_batch])
-        current_qs_list = model.predict(current_states, verbose=0)
+        predicted_qs_list = q_model.predict(current_states, verbose=0)
         next_states = np.array([info[3][agent] for info in mini_batch])
-        future_qs_list = model.predict(next_states, verbose=0)
+        future_qs = t_model.predict(next_states, verbose=0)
 
         X = []
         Y = []
         for i, (observation, actions, reward, new_observation, terminated) in enumerate(mini_batch):
             action = actions[agent]
             if not terminated:
-                max_future_q = reward[agent] + discount_factor * np.max(future_qs_list[i])
+                max_future_q = reward[agent] + discount_factor * np.max(future_qs[i,:])
             else:
                 max_future_q = reward[agent]
 
-            current_qs = current_qs_list[i,:]
-            current_qs[action] = (1 - learning_rate) * current_qs[action] + learning_rate * max_future_q
+            predicted_qs = predicted_qs_list[i,:]
+            predicted_qs[action] = (1 - learning_rate) * predicted_qs[action] + learning_rate * max_future_q
 
             X.append(observation[agent])
-            Y.append(current_qs)
-        model.fit(np.array(X), np.array(Y), batch_size=batch_size, verbose=0, shuffle=True)
+            Y.append(predicted_qs)
+        q_model.fit(np.array(X), np.array(Y), batch_size=batch_size, verbose=0, shuffle=True)
+
+    def copy_weights(self):
+        for agent, q_model in self.q_models.items():
+            self.t_models[agent].set_weights(q_model.get_weights())
 

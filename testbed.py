@@ -12,11 +12,12 @@ env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 10
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 
-train_episodes = 300
+train_episodes = 100
 epsilon = 1 #Epsilon-greedy algorithm, every step is random initially
 max_epsilon = 1
 min_epsilon = 0.01
-decay = 0.01
+decay = 0.05
+world_steps = 0
 
 replay_memory = deque(maxlen=50_000)
 cumulative_rewards = {agent.name: [] for agent in env.world.agents}
@@ -26,6 +27,7 @@ for episode in tqdm(range(train_episodes)):
     for agent in env.world.agents:
         cumulative_rewards[agent.name].append(0)
     while env.world.agents:
+        world_steps += 1
         if np.random.rand() <= epsilon:
             actions = {agent.name: env.action_space(agent).sample() for agent in env.world.agents}
         else:
@@ -35,9 +37,12 @@ for episode in tqdm(range(train_episodes)):
         for agent in env.world.agents:
             cumulative_rewards[agent.name][-1] += rewards[agent.name]
         replay_memory.append([observations, actions, rewards, new_observations, terminations])
-        if episode % 10 == 0:
-            # Network training is currently quite time expensive, explore training less frequently
+        if (world_steps % 4 == 0) or any(terminations.values()) or all(truncations.values()):
+            # Train Q-Networks every 4 simulation steps or at simulation end
             [learner.train(replay_memory, name) for name in env.agent_names]
+        if world_steps >= 100:
+            learner.copy_weights()
+            world_steps = 0
         env.render()
         observations = new_observations
     epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay * episode)
