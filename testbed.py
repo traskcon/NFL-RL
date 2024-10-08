@@ -37,8 +37,8 @@ for episode in tqdm(range(train_episodes)):
         for agent in env.world.agents:
             cumulative_rewards[agent.name][-1] += rewards[agent.name]
         replay_memory.append([observations, actions, rewards, new_observations, terminations])
-        if (world_steps % 4 == 0) or any(terminations.values()) or all(truncations.values()):
-            # Train Q-Networks every 4 simulation steps or at simulation end
+        if (world_steps % 10 == 0) or any(terminations.values()) or all(truncations.values()):
+            # Train Q-Networks every 10 simulation steps or at simulation end
             [learner.train(replay_memory, name) for name in env.agent_names]
         if world_steps >= 100:
             learner.copy_weights()
@@ -52,7 +52,10 @@ for episode in tqdm(range(train_episodes)):
 env.close()
 
 #Visualize cumulative rewards
+i = 1
 for agent, rewards in cumulative_rewards.items():
+    plt.subplot(2,1,i)
     plt.plot(range(train_episodes), rewards, label=agent)
+    i += 1
 plt.legend()
 plt.show()

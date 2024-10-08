@@ -301,30 +301,31 @@ class Scenario():
         # Initial positions for landmark, agents
         goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
-        starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([60,16])}
+        starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([30,16])}
         for agent in world.agents:
             agent.goal_a = goal
             agent.location = starting_locations[agent.name]
         for landmark in world.landmarks:
             # Can use landmarks to design plays for agents
-            landmark.location = np.random.randint(15,45,2)
+            landmark.location = np.array([35, 40])
 
     def agent_reward(self, agent, world):
         # Reward WR by how close they are to landmark and how far DB is from them
         # Currently doing well = positive reward values
         if agent.oob:
-            return -100 #Large pentalty for stepping out of bounds
+            return -1000 #Large pentalty for stepping out of bounds
         elif np.sum(np.square(agent.location - agent.goal_a.location)) == 0:
             # If agent reaches target, give them a big reward
-            return 50
+            return 500
         else:
-            scale_factor = 0.1 # Scale down the continuous rewards to emphasize final reward
+            # Scale each component of the agent reward separately
+            # Ex. 10 times more important to reach goal than to avoid CB
             defensive_players = self.defensive_players(world)
-            def_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
+            def_rew = 0.0 * sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in defensive_players)
-            off_rew = -np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
+            off_rew = -10 * np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
             time_penalty = -10/(1+np.exp(-world.timestep+5)) #Average NFL play lasts ~5s, motivate WR to get to target quickly
-            return scale_factor* (off_rew + def_rew + time_penalty)
+            return off_rew + def_rew + time_penalty
     
     def adversary_reward(self, agent, world):
         offensive_players = self.offensive_players(world)
