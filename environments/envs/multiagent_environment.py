@@ -313,15 +313,15 @@ class Scenario():
         # Reward WR by how close they are to landmark and how far DB is from them
         # Currently doing well = positive reward values
         if agent.oob:
-            return -1000 #Large pentalty for stepping out of bounds
+            return -100000 #Large pentalty for stepping out of bounds
         elif np.sum(np.square(agent.location - agent.goal_a.location)) == 0:
             # If agent reaches target, give them a big reward
-            return 500
+            return 50000
         else:
             # Scale each component of the agent reward separately
             # Ex. 10 times more important to reach goal than to avoid CB
             defensive_players = self.defensive_players(world)
-            def_rew = 0.0 * sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
+            def_rew = 0.1 * sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in defensive_players)
             off_rew = -10 * np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
             time_penalty = -10/(1+np.exp(-world.timestep+5)) #Average NFL play lasts ~5s, motivate WR to get to target quickly

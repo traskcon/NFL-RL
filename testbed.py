@@ -12,15 +12,16 @@ env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 10
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 
-train_episodes = 100
+train_episodes = 1000
 epsilon = 1 #Epsilon-greedy algorithm, every step is random initially
 max_epsilon = 1
 min_epsilon = 0.01
-decay = 0.05
+decay = 0.01
 world_steps = 0
 
 replay_memory = deque(maxlen=50_000)
 cumulative_rewards = {agent.name: [] for agent in env.world.agents}
+q_loss = {agent.name: [] for agent in env.world.agents}
 
 for episode in tqdm(range(train_episodes)):
     observations, infos = env.reset()
@@ -40,6 +41,10 @@ for episode in tqdm(range(train_episodes)):
         if (world_steps % 10 == 0) or any(terminations.values()) or all(truncations.values()):
             # Train Q-Networks every 10 simulation steps or at simulation end
             [learner.train(replay_memory, name) for name in env.agent_names]
+            try:
+                [q_loss[name].append(learner.history[name].history["loss"]) for name in env.agent_names]
+            except:
+                pass
         if world_steps >= 100:
             learner.copy_weights()
             world_steps = 0
@@ -54,8 +59,13 @@ env.close()
 #Visualize cumulative rewards
 i = 1
 for agent, rewards in cumulative_rewards.items():
-    plt.subplot(2,1,i)
-    plt.plot(range(train_episodes), rewards, label=agent)
+    plt.subplot(2,2,i)
+    plt.gca().set_title(agent + " Reward")
+    plt.plot(range(train_episodes), rewards)
     i += 1
-plt.legend()
+for agent, loss in q_loss.items():
+    plt.subplot(2,2,i)
+    plt.gca().set_title(agent + " Loss")
+    plt.plot(range(len(loss)), loss)
+    i += 1
 plt.show()

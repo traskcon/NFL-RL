@@ -16,6 +16,7 @@ class Policy():
         self.reward_function = env.scenario.reward
         self.q_models = dict() # Q-Network Models for each agent
         self.t_models = dict() # Target Network Models for each agent
+        self.history = dict()
         for agent, state in observations.items():
             self.q_models[agent] = self.build_dqn(state)
             self.t_models[agent] = self.build_dqn(state)
@@ -84,7 +85,7 @@ class Policy():
 
             X.append(observation[agent])
             Y.append(predicted_qs)
-        q_model.fit(np.array(X), np.array(Y), batch_size=batch_size, verbose=0, shuffle=True)
+        self.history[agent] = q_model.fit(np.array(X), np.array(Y), batch_size=batch_size, verbose=0, shuffle=True)
 
     def copy_weights(self):
         for agent, q_model in self.q_models.items():
