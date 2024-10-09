@@ -92,10 +92,17 @@ class Policy():
             self.t_models[agent].set_weights(q_model.get_weights())
 
     def save_models(self):
-        for agent, q_model in self.q_models.items():
-            filename = "./models/" + agent + "_q-model.keras"
-            q_model.save(filename)
-        for agent, t_model in self.t_models.items():
-            filename = "./models/" + agent + "_t-model.keras"
-            t_model.save(filename)
+        for agent in self.q_models.keys():
+            q_filename = "./models/" + agent + "_q-model.keras"
+            self.q_models[agent].save(q_filename)
+            t_filename = "./models/" + agent + "_t-model.keras"
+            self.t_models[agent].save(t_filename)
+
+    def load_models(self):
+        # IMPORTANT: Assumes pre-trained models exist for every present agent
+        for agent in self.q_models.keys():
+            q_filename = "./models/" + agent + "_q-model.keras"
+            t_filename = "./models/" + agent + "_t-model.keras"
+            self.q_models[agent] = keras.saving.load_model(q_filename)
+            self.t_models[agent] = keras.saving.load_model(t_filename)
 
