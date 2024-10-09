@@ -93,9 +93,9 @@ class Policy():
 
     def save_models(self):
         for agent, q_model in self.q_models.items():
-            filename = agent + "_q-model.keras"
+            filename = "./models/" + agent + "_q-model.keras"
             q_model.save(filename)
         for agent, t_model in self.t_models.items():
-            filename = agent + "_t-model.keras"
+            filename = "./models/" + agent + "_t-model.keras"
             t_model.save(filename)
 
