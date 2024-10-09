@@ -302,12 +302,14 @@ class Scenario():
         goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
         starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([30,16])}
+        routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
         for agent in world.agents:
             agent.goal_a = goal
             agent.location = starting_locations[agent.name]
         for landmark in world.landmarks:
             # Can use landmarks to design plays for agents
-            landmark.location = np.array([35, 40])
+            # Test randomly sampling which route to run (slant/in or go)
+            landmark.location = routes[np.random.choice(["slant/in","go"])]
 
     def agent_reward(self, agent, world):
         # Reward WR by how close they are to landmark and how far DB is from them
