@@ -12,7 +12,7 @@ env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 10
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 
-train_episodes = 1000
+train_episodes = 500
 epsilon = 1 #Epsilon-greedy algorithm, every step is random initially
 max_epsilon = 1
 min_epsilon = 0.01
@@ -55,6 +55,7 @@ for episode in tqdm(range(train_episodes)):
     if episode == (train_episodes - 2):
         env.render_mode = "human"
 env.close()
+learner.save_models()
 
 #Visualize cumulative rewards
 i = 1
