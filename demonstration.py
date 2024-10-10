@@ -9,6 +9,8 @@ observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 learner.load_models()
 
+print(env.target_location)
+
 while env.world.agents:
     actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn")
                for agent in env.world.agents}

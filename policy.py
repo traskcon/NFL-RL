@@ -23,8 +23,6 @@ class Policy():
 
     def choose_action(self, agent, observation=None, method="short-term"):
         # Environment state is a tuple of n 1x2 np arrays containing each agent's position
-        # Initial basic decision-making policy:
-        # Choose action that gives the largest reward based on the current state
         if method == "dqn":
             model = self.q_models[agent.name]
             observation = np.array(observation)
@@ -32,6 +30,7 @@ class Policy():
             predicted = model.predict(observation_reshaped, verbose=0).flatten()
             return np.argmax(predicted) # Return action with predicted highest Q-value
         else:
+            # Heuristic algorithm: Take action with largest immediate reward
             rewards = dict()
             temp_agent = copy.copy(agent)
             for action, direction in self.env._action_to_direction.items():
