@@ -30,7 +30,8 @@ for episode in tqdm(range(train_episodes)):
     while env.world.agents:
         world_steps += 1
         if np.random.rand() <= epsilon:
-            actions = {agent.name: env.action_space(agent).sample() for agent in env.world.agents}
+            actions = {agent.name: learner.choose_action(agent, observations=[agent.name], method="heuristic") 
+                       for agent in env.world.agents}
         else:
             actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn") 
                        for agent in env.world.agents}
