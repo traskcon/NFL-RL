@@ -43,7 +43,7 @@ for episode in tqdm(range(train_episodes)):
         for agent in env.world.agents:
             cumulative_rewards[agent.name][-1] += rewards[agent.name]
         replay_memory.append([observations, actions, rewards, new_observations, terminations])
-        if (world_steps % 10 == 0) or any(terminations.values()) or all(truncations.values()):
+        if (world_steps % 5 == 0) or any(terminations.values()) or all(truncations.values()):
             # Train Q-Networks every 10 simulation steps or at simulation end
             [learner.train(replay_memory, name) for name in env.agent_names]
             try:
@@ -60,7 +60,7 @@ for episode in tqdm(range(train_episodes)):
     if episode == (train_episodes - 2):
         env.render_mode = "human"
 env.close()
-learner.save_models("BL")
+learner.save_models("-BL")
 
 #Visualize cumulative rewards
 i = 1
