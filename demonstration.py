@@ -7,7 +7,7 @@ scenario = multiagent_environment.Scenario()
 env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles=100, render_mode="human")
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
-learner.load_models()
+learner.load_models("BL")
 
 print(env.target_location)
 
@@ -16,4 +16,5 @@ while env.world.agents:
                for agent in env.world.agents}
     new_observations, rewards, terminations, truncations, infos = env.step(actions)
     env.render()
+    observations = new_observations
 env.close()
