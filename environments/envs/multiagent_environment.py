@@ -1,4 +1,4 @@
-import functools
+import pandas as pd
 from copy import copy
 import numpy as np
 from gymnasium.spaces import Discrete, MultiDiscrete
@@ -269,7 +269,14 @@ class MultiEnvironment(ParallelEnv):
     def action_space(self, agent):
         return self.action_spaces[agent.name]
     
+    def load_roster(self, file="Roster.csv"):
+        roster = pd.read_csv(file)
+        print(roster)
+        for i, agent in enumerate(self.world.agents):
+            agent.position = roster["Position"][i]
+            agent.name = roster["Name"][i]
 
+#TODO: Should probably either collapse this into the environment or refactor in a more logical way
 class Scenario():
     def make_world(self, N=2):
         world = World()
