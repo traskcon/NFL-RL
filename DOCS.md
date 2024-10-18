@@ -30,6 +30,15 @@ environments
         * Renders the world
         * Implements actions
         * Determine whether play has ended (termination/truncation)
+
+policy.py
+* Contains DQNs for each agent
+* Trains/Saves/Loads DQNs
+* Decides what action to take based on environment state and policy
+
+roster.csv
+* Contains agent details (position, name, team)
+* Expand to include stats in the future
     
 
 ## Scenarios
@@ -65,5 +74,7 @@ Defensive positions will consist of DL, LB, CB, S, with no hard rules on what co
 Action Spaces
 * QB
     * ?Who to throw the ball to?
+    * Discrete(4) -> {Right, Up, Left, Down}
+        * Likely will require two DQNs, one for each action space
 * Every other player:
     * Discrete(4) -> {Right, Up, Left, Down}

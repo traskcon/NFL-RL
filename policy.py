@@ -56,6 +56,7 @@ class Policy():
         ''' Train the Q-Networks '''
         q_model = self.q_models[agent]
         t_model = self.t_models[agent]
+        # Explore adjusting learning rate, discount factor to shape behavior
         learning_rate = 0.7
         discount_factor = 0.9
 
