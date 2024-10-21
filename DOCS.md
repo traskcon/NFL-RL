@@ -23,6 +23,9 @@ testbed.py
 * Will likely be renamed in final version
 * Testing ground during development
 
+demonstration.py
+* Used to visualize trained agents
+
 environments
 * envs
     * multiagent_environment.py
