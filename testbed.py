@@ -3,7 +3,6 @@ from environments.envs import multiagent_environment
 import numpy as np
 import policy
 from collections import deque
-import time
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 

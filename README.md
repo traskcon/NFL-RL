@@ -9,13 +9,13 @@ Additional features will be offloaded to their own classes where it makes sense 
 
 ### Proof-of-Concept
  * ~~Create 2D, rectangular grid environment~~ (DONE)
- * Build test agent
- * Implement basic reward function
- * Visualize results
+ * ~~Build test agent~~ (DONE)
+ * ~~Implement basic reward function~~ (DONE)
+ * ~~Visualize results~~ (DONE)
 
 ### Initial Prototype
  * Scale-up the number of agents present
-    * Begin with adding a "DB" agent who shadows "WR" agent
+    * ~~Begin with adding a "DB" agent who shadows "WR" agent~~
     * Then scale to 11 agent offense
     * Finally full 22 agent game
  * Refine environment
@@ -24,7 +24,7 @@ Additional features will be offloaded to their own classes where it makes sense 
     * Discrete Rewards (Occur at the end of a play):
         * EPA from the play (+Off, -Def)
         * TD (+Off, -Def)
-        * INT (-Off, +Def)
+        * INT, FUM (-Off, +Def)
     * Continuous Rewards (Occur each tick):
         * For WRs: Yds of separation (euclidean distance from nearest DB)
         * For DBs: -Yds of separation

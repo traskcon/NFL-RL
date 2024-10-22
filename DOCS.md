@@ -76,7 +76,7 @@ Defensive positions will consist of DL, LB, CB, S, with no hard rules on what co
 
 Action Spaces
 * QB
-    * ?Who to throw the ball to?
+    * Discrete({eligible receivers})
     * Discrete(4) -> {Right, Up, Left, Down}
         * Likely will require two DQNs, one for each action space
 * Every other player:

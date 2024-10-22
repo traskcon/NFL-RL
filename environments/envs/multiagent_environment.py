@@ -1,7 +1,5 @@
 import pandas as pd
-from copy import copy
 import numpy as np
-from gymnasium.spaces import Discrete, MultiDiscrete
 from gymnasium import spaces
 import pygame
 from environments.utils.core import Agent, Landmark, World
