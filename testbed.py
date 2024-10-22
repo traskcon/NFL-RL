@@ -29,11 +29,7 @@ for episode in tqdm(range(train_episodes)):
     while env.world.agents:
         world_steps += 1
         decision = np.random.rand()
-        if decision <= 10/(episode+1):
-            # For first ~10 episodes, take heuristically optimal actions
-            actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="heuristic") 
-                       for agent in env.world.agents}
-        elif decision <= epsilon:
+        if decision <= epsilon:
             actions = {agent.name: env.action_space(agent).sample() for agent in env.world.agents}
         else:
             actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn") 
@@ -59,7 +55,7 @@ for episode in tqdm(range(train_episodes)):
     if episode == (train_episodes - 2):
         env.render_mode = "human"
 env.close()
-learner.save_models("-BL")
+learner.save_models("")
 
 #Visualize cumulative rewards
 i = 1
