@@ -1,0 +1,3 @@
+,testbed_hyperparameters,,,,,,environment_hyperparameters,,,,policy_hyperparameters,,,,
+suffix,train_episodes,max_epsilon,min_epsilon,epsilon_decay,Q_network_update_freq,T_network_update_freq,observations,agents,routes,rewards,dqn,learning_rate,discount_factor,batch_size
+-RP,500,1,0.01,0.01,5,100,all agent positions; relative landmark location, 2 (WR-DB), slant/in, -100 OOB; 50 Target; 0.0001dist(DB)-0.01dist(Landmark)-logistic(timestep), OFF: lr=0.001; 6x24x12x4 FC ReLU; Adam & Huber loss DEF: -dist(WR),0.7,0.9,128

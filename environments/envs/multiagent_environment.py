@@ -102,7 +102,7 @@ class MultiEnvironment(ParallelEnv):
         # Get observations
         observations = {a.name: (
             *[agent.location for agent in self.world.agents],
-            self.target_location,
+            self.target_location - a.location,
         ) for a in self.world.agents}
 
         # Get dummy infos
@@ -329,7 +329,7 @@ class Scenario():
             # Ex. 10 times more important to reach goal than to avoid CB
             defensive_players = self.defensive_players(world)
             def_rew = 0.0001 * sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
-                        for a in defensive_players)
+                            for a in defensive_players)
             off_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
             time_penalty = -1/(1+np.exp(-world.timestep+10)) #Average NFL play lasts ~5s, motivate WR to get to target quickly
             return off_rew + def_rew + time_penalty
