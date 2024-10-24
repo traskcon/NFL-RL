@@ -9,8 +9,13 @@ observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 learner.load_models("-MK3")
 
+epsilon = 0.01
+
 while env.world.agents:
-    actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn")
+    if np.random.random() <= epsilon:
+        actions = {agent.name: env.action_space(agent).sample() for agent in env.world.agents}
+    else:
+        actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn")
                for agent in env.world.agents}
     new_observations, rewards, terminations, truncations, infos = env.step(actions)
     env.render()

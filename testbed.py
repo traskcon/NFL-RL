@@ -53,15 +53,15 @@ for episode in tqdm(range(train_episodes)):
         observations = new_observations
     if any(terminations.values()):
         consecutive_terminations += 1
+        if consecutive_terminations >= 5:
+            # Stop the training early if WR successfully hits the target 5 times in a row
+            break
     else:
         consecutive_terminations = 0
     epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay * episode)
     # Visualize the final trained agents
     if episode == (train_episodes - 2):
         env.render_mode = "human"
-    elif consecutive_terminations >= 5:
-        # Stop the training early if WR successfully hits the target 5 times in a row
-        break
 env.close()
 learner.save_models("-MK3L")
 
@@ -70,7 +70,7 @@ i = 1
 for agent, rewards in cumulative_rewards.items():
     plt.subplot(2,2,i)
     plt.gca().set_title(agent + " Reward")
-    plt.plot(range(train_episodes), rewards)
+    plt.plot(range(len(rewards)), rewards)
     i += 1
 for agent, loss in q_loss.items():
     plt.subplot(2,2,i)
