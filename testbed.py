@@ -41,10 +41,6 @@ for episode in tqdm(range(train_episodes)):
         replay_memory.append([observations, actions, rewards, new_observations, terminations])
         if (world_steps % 10 == 0) or any(terminations.values()) or all(truncations.values()):
             # Train Q-Networks every 5 simulation steps or at simulation end
-            if any(terminations.values()):
-                consecutive_terminations += 1
-            else:
-                consecutive_terminations = 0
             [learner.train(replay_memory, name) for name in env.agent_names]
             try:
                 [q_loss[name].append(learner.history[name].history["loss"]) for name in env.agent_names]
@@ -55,6 +51,10 @@ for episode in tqdm(range(train_episodes)):
             world_steps = 0
         env.render()
         observations = new_observations
+    if any(terminations.values()):
+        consecutive_terminations += 1
+    else:
+        consecutive_terminations = 0
     epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay * episode)
     # Visualize the final trained agents
     if episode == (train_episodes - 2):
