@@ -11,12 +11,13 @@ env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 10
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 
-train_episodes = 300
+train_episodes = 1000
 epsilon = 1 #Epsilon-greedy algorithm, every step is random initially
 max_epsilon = 1
 min_epsilon = 0.01
-decay = 0.01
+decay = 0.005
 world_steps = 0
+consecutive_terminations = 0
 
 replay_memory = deque(maxlen=50_000)
 cumulative_rewards = {agent.name: [] for agent in env.world.agents}
@@ -40,6 +41,10 @@ for episode in tqdm(range(train_episodes)):
         replay_memory.append([observations, actions, rewards, new_observations, terminations])
         if (world_steps % 10 == 0) or any(terminations.values()) or all(truncations.values()):
             # Train Q-Networks every 5 simulation steps or at simulation end
+            if any(terminations.values()):
+                consecutive_terminations += 1
+            else:
+                consecutive_terminations = 0
             [learner.train(replay_memory, name) for name in env.agent_names]
             try:
                 [q_loss[name].append(learner.history[name].history["loss"]) for name in env.agent_names]
@@ -54,8 +59,11 @@ for episode in tqdm(range(train_episodes)):
     # Visualize the final trained agents
     if episode == (train_episodes - 2):
         env.render_mode = "human"
+    elif consecutive_terminations >= 5:
+        # Stop the training early if WR successfully hits the target 5 times in a row
+        break
 env.close()
-learner.save_models("-MK3")
+learner.save_models("-MK3L")
 
 #Visualize cumulative rewards
 i = 1
