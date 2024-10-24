@@ -28,6 +28,8 @@ class Policy():
             observation = np.array(observation)
             observation_reshaped = np.reshape(observation, [1, *observation.shape])
             predicted = model.predict(observation_reshaped, verbose=0).flatten()
+            # Show predicted Q-values for debugging
+            # print(predicted)
             return np.argmax(predicted) # Return action with predicted highest Q-value
         else:
             # Heuristic algorithm: Take action with largest immediate reward
@@ -58,7 +60,7 @@ class Policy():
         t_model = self.t_models[agent]
         # Explore adjusting learning rate, discount factor to shape behavior
         learning_rate = 0.7
-        discount_factor = 0.9
+        discount_factor = 0.95
 
         MIN_REPLAY_SIZE = 1000
         if len(replay_memory) < MIN_REPLAY_SIZE:

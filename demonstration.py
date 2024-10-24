@@ -7,7 +7,7 @@ scenario = multiagent_environment.Scenario()
 env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles=100, render_mode="human")
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
-learner.load_models("")
+learner.load_models("-MK3")
 
 while env.world.agents:
     actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn")
