@@ -266,10 +266,3 @@ class MultiEnvironment(ParallelEnv):
     
     def action_space(self, agent):
         return self.action_spaces[agent.name]
-    
-    def load_roster(self, file="Roster.csv"):
-        roster = pd.read_csv(file)
-        print(roster)
-        for i, agent in enumerate(self.world.agents):
-            agent.position = roster["Position"][i]
-            agent.name = roster["Name"][i]
