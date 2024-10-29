@@ -314,7 +314,8 @@ class Scenario():
         for landmark in world.landmarks:
             # Can use landmarks to design plays for agents
             # Test randomly sampling which route to run (slant/in or go)
-            landmark.location = routes["slant/in"]
+            # landmark.location = routes[np.random.choice(list(routes.keys()))]
+            landmark.location = routes["go"]
 
     def agent_reward(self, agent, world):
         # Reward WR by how close they are to landmark and how far DB is from them

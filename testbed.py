@@ -63,7 +63,7 @@ for episode in tqdm(range(train_episodes)):
     if episode == (train_episodes - 2):
         env.render_mode = "human"
 env.close()
-learner.save_models("-MK3L")
+learner.save_models("-MK3_MR")
 
 #Visualize cumulative rewards
 i = 1
