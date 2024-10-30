@@ -33,11 +33,11 @@ class Scenario():
         goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
         self.load_play()
-        starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([30,16])}
+        self.yardline = 30
         routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
         for agent in world.agents:
             agent.goal_a = goal
-            agent.location = starting_locations[agent.name]
+        #TODO: Remove, incorporate into load_play
         for landmark in world.landmarks:
             # Can use landmarks to design plays for agents
             # Test randomly sampling which route to run (slant/in or go)
@@ -86,7 +86,8 @@ class Scenario():
     def dl_reward(self, agent, world):
         pass
 
-    def reward(self, agent, world):
+    def step_reward(self, agent, world):
+        #Position-specific reward given at each timestep during a play (reward-shaping)
         reward_dict = {
             "QB": self.qb_reward,
             "RB": self.rb_reward,
@@ -99,6 +100,11 @@ class Scenario():
         }
         reward_func = reward_dict[agent.position]
         return reward_func(agent, world)
+    
+    def play_reward(self, agent, world):
+        #Reward based on TD, turnover, EPA
+        #Calculate EPA using ep_model.py
+        pass
 
     def defensive_players(self, world):
         return [agent for agent in world.agents if agent.defense]

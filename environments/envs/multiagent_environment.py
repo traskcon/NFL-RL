@@ -25,6 +25,7 @@ class MultiEnvironment(ParallelEnv):
         self.timestep = None
         self.world = scenario.make_world()
         self.agent_names = [agent.name for agent in self.world.agents]
+        #TODO: Update colormap to match NFL teams
         self.colormap = {"WR_0":(0,0,255), "DB_0":(255,0,0)}
 
         self.observation_spaces = dict()
