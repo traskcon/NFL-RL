@@ -16,7 +16,7 @@ class Scenario():
         for i, agent in enumerate(world.agents):
             agent.defense = True if agent.position in ["DB","DL","LB"] else False
             base_index = i if i < num_defense else int(i - num_defense)
-            agent.index = f"{agent.position}_{base_index}"
+            agent.index = f"{agent.position}_{base_index+1}"
             agent.location = np.array([None, None])
         # Add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
@@ -34,15 +34,8 @@ class Scenario():
         # Can build formations as an argument here
         self.load_play()
         self.yardline = 30
-        routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
         for agent in world.agents:
             agent.goal_a = goal
-        #TODO: Remove, incorporate into load_play
-        for landmark in world.landmarks:
-            # Can use landmarks to design plays for agents
-            # Test randomly sampling which route to run (slant/in or go)
-            # landmark.location = routes[np.random.choice(list(routes.keys()))]
-            landmark.location = routes["slant/in"]
 
     def qb_reward(self, agent, world):
         pass
@@ -115,9 +108,15 @@ class Scenario():
     def load_roster(self, file="Roster.csv"):
         roster = pd.read_csv(file)
         for i, agent in enumerate(self.world.agents):
-            agent.position = roster["Position"][i]
-            agent.name = roster["Name"][i]
+            agent.position = roster["position"][i]
+            agent.name = roster["name"][i]
+            agent.strength = roster["strength"][i]
 
     def load_play(self, file="Playbook.csv"):
         # CSV file containing player starting locations for different plays
-        pass
+        #routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
+        #landmark.location = routes["slant/in"]
+        play = pd.read_csv(file)
+        for i, agent in enumerate(self.world.agents):
+            row = play.loc[play["position"] == agent.index]
+            agent.location = np.array(row["x"],row["y"])

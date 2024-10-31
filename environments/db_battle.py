@@ -9,6 +9,7 @@ class Scenario():
         num_defense = N/2
         num_landmarks = 1
         positions = ["WR", "DB"]
+        strengths = [67, 63]
         world.timestep = None
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
@@ -18,6 +19,7 @@ class Scenario():
             base_index = i if i < num_defense else int(i - num_defense)
             agent.name = f"{agent.position}_{base_index}"
             agent.location = np.array([None, None])
+            agent.strength = strengths[i]
         # Add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
