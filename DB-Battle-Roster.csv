@@ -1,3 +1,3 @@
-Position,Name,Team
-WR,ARSB,Lions
-DB,Pat Surtain,Broncos
+position,name,team,strength
+WR,ARSB,Lions,67
+DB,Pat Surtain,Broncos,63
