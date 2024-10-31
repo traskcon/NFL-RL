@@ -1,23 +1,23 @@
 formation,position,x,y
-,WR_1,30,10
-,WR_2,  ,
-,WR_3,  ,
-,OL_1,  ,
-,OL_2,  ,
-,OL_3,  ,
-,OL_4,  ,
-,OL_5,  ,
-,QB_1,  ,
-,RB_1,  ,
-,TE_1,  ,
-,DL_1,  ,
-,DL_2,  ,
-,DL_3,  ,
-,DL_4,  ,
-,LB_1,  ,
-,LB_2,  ,
-,LB_3,  ,
-,DB_1,40,11
-,DB_2,  ,
-,DB_3,  ,
-,DB_4,  ,
+SHOTGUN-3x1,WR_1,29,35
+SHOTGUN-3x1,WR_2,30,8
+SHOTGUN-3x1,WR_3,29,17
+SHOTGUN-3x1,OL_1,29,33
+SHOTGUN-3x1,OL_2,29,31
+SHOTGUN-3x1,OL_3,30,30
+SHOTGUN-3x1,OL_4,29,28
+SHOTGUN-3x1,OL_5,29,27
+SHOTGUN-3x1,QB_1,25,30
+SHOTGUN-3x1,RB_1,24,32
+SHOTGUN-3x1,TE_1,28,25
+over1,DL_1,31,33
+over1,DL_2,31,31
+over1,DL_3,31,27
+over1,DL_4,31,24
+over1,LB_1,35,34
+over1,LB_2,35,29
+over1,LB_3,35,25
+over1,DB_1,34,38
+over1,DB_2,43,21
+over1,DB_3,33,17
+over1,DB_4,36,8
