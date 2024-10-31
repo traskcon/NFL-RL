@@ -82,11 +82,25 @@ class MultiEnvironment(ParallelEnv):
         for agent in self.world.agents:
             agent_action = actions[agent.name] # Execute action
             agent_direction = self._action_to_direction[agent_action] #Map the action (0,1,2,3) to the direction of movement
-            # Use np.clip to ensure we don't leave the grid
-            agent.location = np.clip(
-                agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
-            )
-    
+            player_locations = [agent.location for agent in self.world.agents]
+            if agent.location + agent_direction in player_locations:
+                i = player_locations.index(agent.location + agent_direction)
+                opp_agent = self.world.agents[i]
+                strength_diff = agent.strength - opp_agent.strength
+                #Sampling from normal distribution
+                if strength_diff >= np.random.randn()*10:
+                    # Push opponent backwards
+                    opp_agent.location = opp_agent.location - agent.direction
+                    # Use np.clip to ensure we don't leave the grid
+                    agent.location = np.clip(
+                        agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
+                    )
+                # Otherwise don't move
+            else:
+                agent.location = np.clip(
+                    agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
+                )
+                
         # Check termination conditions
         for agent in self.world.agents:
             self.terminations[agent.name] = self.termination(agent)

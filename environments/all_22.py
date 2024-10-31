@@ -115,8 +115,9 @@ class Scenario():
     def load_roster(self, file="Roster.csv"):
         roster = pd.read_csv(file)
         for i, agent in enumerate(self.world.agents):
-            agent.position = roster["Position"][i]
-            agent.name = roster["Name"][i]
+            agent.position = roster["position"][i]
+            agent.name = roster["name"][i]
+            agent.strength = roster["strength"][i]
 
     def load_play(self, file="Playbook.csv"):
         # CSV file containing player starting locations for different plays
