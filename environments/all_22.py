@@ -12,7 +12,7 @@ class Scenario():
         world.timestep = None
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
-        self.load_roster(roster)
+        self.load_roster(world, roster)
         for i, agent in enumerate(world.agents):
             agent.defense = True if agent.position in ["DB","DL","LB"] else False
             base_index = i if i < num_defense else int(i - num_defense)
@@ -105,12 +105,13 @@ class Scenario():
     def offensive_players(self, world):
         return [agent for agent in world.agents if not agent.defense]
     
-    def load_roster(self, file="Roster.csv"):
+    def load_roster(self, world, file="Roster.csv"):
         roster = pd.read_csv(file)
-        for i, agent in enumerate(self.world.agents):
+        for i, agent in enumerate(world.agents):
             agent.position = roster["position"][i]
             agent.name = roster["name"][i]
             agent.strength = roster["strength"][i]
+            agent.team = roster["team"][i]
 
     def load_play(self, file="Playbook.csv"):
         # CSV file containing player starting locations for different plays

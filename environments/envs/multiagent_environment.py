@@ -8,7 +8,7 @@ from pettingzoo import ParallelEnv
 class MultiEnvironment(ParallelEnv):
     metadata = {"name":"multiagent_environment-v0", "render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, max_cycles, scenario, render_mode=None, width=124, length=57):
+    def __init__(self, max_cycles, scenario, render_mode=None, width=124, length=57, roster="Roster.csv"):
         '''Initial WR-DB Coverage Battle environment
         Based on PettingZoo prison escape tutorial: https://pettingzoo.farama.org/tutorials/custom_environment/2-environment-logic/
         '''
@@ -20,13 +20,13 @@ class MultiEnvironment(ParallelEnv):
         self.scenario = scenario
         self.window_width = width*scale_factor  # The dimensions of the PyGame window
         self.window_length = length*scale_factor
-
+        self.roster = roster
         self.target_location = np.array([None, None])
         self.timestep = None
-        self.world = scenario.make_world()
+        self.world = scenario.make_world(roster=roster)
         self.agent_names = [agent.name for agent in self.world.agents]
         #TODO: Update colormap to match NFL teams
-        self.colormap = {"WR_0":(0,0,255), "DB_0":(255,0,0)}
+        self.colormap = {"Lions":(0,118,182), "Broncos":(255,82,0), "Commanders":(90,20,20)}
 
         self.observation_spaces = dict()
         self.action_spaces = dict()
@@ -57,7 +57,7 @@ class MultiEnvironment(ParallelEnv):
     def reset(self, seed=None, options=None):
         '''Re-initialize the environment'''
         self.timestep = 0
-        self.world = self.scenario.make_world()
+        self.world = self.scenario.make_world(roster=self.roster)
         self.scenario.reset_world(self.world)
 
         self.rewards = {name: 0.0 for name in self.agent_names}
@@ -91,7 +91,7 @@ class MultiEnvironment(ParallelEnv):
                 #Sampling from normal distribution
                 if strength_diff >= np.random.randn()*10:
                     # Push opponent backwards
-                    opp_agent.location = opp_agent.location - agent.direction
+                    opp_agent.location = opp_agent.location - agent_direction
                     # Use np.clip to ensure we don't leave the grid
                     agent.location = np.clip(
                         agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
@@ -252,7 +252,7 @@ class MultiEnvironment(ParallelEnv):
         for agent in self.world.agents:
             pygame.draw.circle(
                 canvas,
-                self.colormap[agent.name],
+                self.colormap[agent.team],
                 (agent.location + 0.5) * pix_square_size,
                 pix_square_size / 3,
             )

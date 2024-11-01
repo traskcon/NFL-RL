@@ -1,25 +1,23 @@
 import numpy as np
+import pandas as pd
 from environments.utils.core import Agent, Landmark, World
 
 class Scenario():
-    def make_world(self, N=2):
+    def make_world(self, N=2, roster="Roster.csv"):
         world = World()
         num_agents = N
         world.num_agents = num_agents
         num_defense = N/2
         num_landmarks = 1
-        positions = ["WR", "DB"]
-        strengths = [67, 63]
         world.timestep = None
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
+        self.load_roster(world, roster)
         for i, agent in enumerate(world.agents):
             agent.defense = False if i < num_defense else True
-            agent.position = positions[i]
             base_index = i if i < num_defense else int(i - num_defense)
             agent.name = f"{agent.position}_{base_index}"
             agent.location = np.array([None, None])
-            agent.strength = strengths[i]
         # Add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -81,3 +79,10 @@ class Scenario():
     
     def offensive_players(self, world):
         return [agent for agent in world.agents if not agent.defense]
+    
+    def load_roster(self, world, file="Roster.csv"):
+        roster = pd.read_csv(file)
+        for i, agent in enumerate(world.agents):
+            agent.position = roster["position"][i]
+            agent.strength = roster["strength"][i]
+            agent.team = roster["team"][i]

@@ -1,11 +1,11 @@
 # Script to demonstrate trained agents operating in the environment
 from environments.envs import multiagent_environment
-from environments import db_battle
+from environments import db_battle, all_22
 import numpy as np
 import policy
 
 scenario = db_battle.Scenario()
-env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles=100, render_mode="human")
+env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles=100, render_mode="human", roster="DB-Battle-Roster.csv")
 observations, infos = env.reset()
 learner = policy.Policy(env, observations)
 learner.load_models("-MK3_MR")
