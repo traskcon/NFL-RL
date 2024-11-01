@@ -80,7 +80,7 @@ Agents:
         * Observations: Own location, WR location
     * Reward Function: -Dist(DB, WR)
 
-### Full Game
+### Full Game (All 22)
 
 Simulating a full American Football game is the ultimate goal of this project, initially on a grid field then with continuous motion & physics.
 This scenario features 22 agents (11 offense, 11 defense), though the exact properties of these agents can vary based on user input.
