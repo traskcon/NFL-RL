@@ -26,7 +26,17 @@ class MultiEnvironment(ParallelEnv):
         self.world = scenario.make_world(roster=roster)
         self.agent_names = [agent.name for agent in self.world.agents]
         #TODO: Update colormap to match NFL teams
-        self.colormap = {"Lions":(0,118,182), "Broncos":(255,82,0), "Commanders":(90,20,20)}
+        self.colormap = {"Lions":(0,118,182), "Broncos":(255,82,0), "Commanders":(90,20,20),
+                         "Cowboys":(0,34,68), "Cardinals":(135,0,39), "Patriots":(0,21,50),
+                         "49ers":(170,0,0), "Vikings":(79,38,131), "Bills":(12,46,130),
+                         "Falcons":(163,13,45), "Ravens":(26,25,95), "Panthers":(0,133,202),
+                         "Bears":(200,65,0), "Bengals":(211,47,30), "Browns":(49,29,0),
+                         "Packers":(28,45,37), "Texans":(0,7,28), "Colts":(1,51,105),
+                         "Jaguars":(0,101,118), "Chiefs":(227,24,55), "Chargers":(238,173,30),
+                         "Rams":(0,53,148), "Dolphins":(0,142,151), "Saints":(159,137,88),
+                         "Giants":(155,161,162), "Jets":(0,63,45), "Raiders":(0,0,0),
+                         "Eagles":(0,76,84), "Steelers":(238,173,30), "Seahawks":(105,190,40),
+                         "Buccaneers":(213,10,10), "Titans":(68,149,210)}
 
         self.observation_spaces = dict()
         self.action_spaces = dict()
