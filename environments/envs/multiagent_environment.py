@@ -62,7 +62,7 @@ class MultiEnvironment(ParallelEnv):
 
         self.rewards = {name: 0.0 for name in self.agent_names}
         self.terminations = {name: False for name in self.agent_names}
-        self.target_location = self.world.agents[0].goal_a.location
+        self.target_location = self.world.agents[0].goal.location
 
         observations = {a.name:(
             *[agent.location for agent in self.world.agents],
@@ -137,7 +137,7 @@ class MultiEnvironment(ParallelEnv):
         # Check if an offensive player has stepped out of bounds
         # TODO: Add code checking if ballcarrier scored a touchdown
         if not agent.defense:
-            if np.sum(np.square(agent.location - agent.goal_a.location)) == 0:
+            if np.sum(np.square(agent.location - agent.goal.location)) == 0:
                 return True #End simulation if WR reaches target
             else:
                 self.check_bounds(agent)

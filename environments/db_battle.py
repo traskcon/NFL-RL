@@ -35,7 +35,7 @@ class Scenario():
         starting_locations = {"WR_0":np.array([20, 10]), "DB_0":np.array([30,16])}
         routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
         for agent in world.agents:
-            agent.goal_a = goal
+            agent.goal = goal
             agent.location = starting_locations[agent.name]
         for landmark in world.landmarks:
             # Can use landmarks to design plays for agents
@@ -48,7 +48,7 @@ class Scenario():
         # Currently doing well = positive reward values
         if agent.oob:
             return -100 #Large pentalty for stepping out of bounds
-        elif np.sum(np.square(agent.location - agent.goal_a.location)) == 0:
+        elif np.sum(np.square(agent.location - agent.goal.location)) == 0:
             # If agent reaches target, give them a big reward
             return 50
         else:
@@ -57,7 +57,7 @@ class Scenario():
             defensive_players = self.defensive_players(world)
             def_rew = 0.0001 * sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                             for a in defensive_players)
-            off_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.goal_a.location)))
+            off_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.goal.location)))
             time_penalty = -((world.timestep/10)**2) #Average NFL play lasts ~5s, motivate WR to get to target quickly
             return off_rew + def_rew + time_penalty
     
