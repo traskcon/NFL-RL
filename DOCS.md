@@ -42,6 +42,19 @@ policy.py
 roster.csv
 * Contains agent details (position, name, team)
 * Expand to include stats in the future
+
+Agents
+* Created by the Scenario
+* Stored in the World
+* Properties:
+    * Position (str) - Player's position {WR, QB, RB, TE, OL, DL, LB, DB}
+    * Name (str) - Player's name
+    * Team (str) - Player's team
+    * Strength (int) - Player's Madden25 strength value, used to resolve collisions
+    * Location (np.array([int, int])) - Player's location on the field
+    * Defense (bool) - Whether player is on defense or not
+    * Index (str) - Player position + index (ex. WR_1, WR_2)
+    * Goal (Landmark) - Player's target 
     
 
 ## Scenarios
