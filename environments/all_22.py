@@ -7,17 +7,11 @@ class Scenario():
         world = World()
         num_agents = N
         world.num_agents = num_agents
-        num_defense = N/2
         num_landmarks = 1
         world.timestep = None
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
         self.load_roster(world, roster)
-        for i, agent in enumerate(world.agents):
-            agent.defense = True if agent.position in ["DB","DL","LB"] else False
-            base_index = i if i < num_defense else int(i - num_defense)
-            agent.index = f"{agent.position}_{base_index+1}"
-            agent.location = np.array([None, None])
         # Add landmarks
         world.landmarks = [Landmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
@@ -107,11 +101,16 @@ class Scenario():
     
     def load_roster(self, world, file="Roster.csv"):
         roster = pd.read_csv(file)
+        position_counts = dict()
         for i, agent in enumerate(world.agents):
             agent.position = roster["position"][i]
             agent.name = roster["name"][i]
             agent.strength = roster["strength"][i]
             agent.team = roster["team"][i]
+            agent.defense = True if agent.position in ["DB","DL","LB"] else False
+            position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
+            agent.index = f"{agent.position}_{position_counts[agent.position]}"
+            agent.location = np.array([None, None])
 
     def load_play(self, file="Playbook.csv"):
         # CSV file containing player starting locations for different plays
