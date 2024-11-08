@@ -26,10 +26,8 @@ class Scenario():
         # Initial positions for landmark, agents
         goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
-        self.load_play()
+        self.load_play(world)
         self.yardline = 30
-        for agent in world.agents:
-            agent.goal = goal
 
     def qb_reward(self, agent, world):
         pass
@@ -111,12 +109,14 @@ class Scenario():
             position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
             agent.index = f"{agent.position}_{position_counts[agent.position]}"
             agent.location = np.array([None, None])
+            agent.goal = Landmark()
 
-    def load_play(self, file="Playbook.csv"):
+    def load_play(self, world, file="Test-Playbook.csv"):
         # CSV file containing player starting locations for different plays
         #routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
         #landmark.location = routes["slant/in"]
         play = pd.read_csv(file)
-        for i, agent in enumerate(self.world.agents):
-            row = play.loc[play["position"] == agent.index]
-            agent.location = np.array(row["x"],row["y"])
+        for i, agent in enumerate(world.agents):
+            row = play.index[play["position"] == agent.index].to_list()[0]
+            agent.location = np.array([play.at[row,"x"],play.at[row,"y"]])
+            agent.goal.location = np.array([play.at[row,"goal_x"], play.at[row,"goal_y"]])
