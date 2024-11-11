@@ -5,3 +5,4 @@ environments/utils/__pycache__/core.cpython-311.pyc
 environments/__pycache__/db_battle.cpython-311.pyc
 environments/envs/__pycache__/multiagent_environment.cpython-311.pyc
 environments/__pycache__/all_22.cpython-311.pyc
+requirements.in
