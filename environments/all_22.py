@@ -30,15 +30,19 @@ class Scenario():
         self.yardline = 30
 
     def qb_reward(self, agent, world):
+        #QB has a two-level reward probably
         pass
 
     def rb_reward(self, agent, world):
+        # Probably just use WR reward
         pass
 
     def te_reward(self, agent, world):
+        # TE reward depends on playcall (Blocking or route-running)
         pass
 
     def ol_reward(self, agent, world):
+        # reward = sum(dist(DL, QB))
         pass
 
     def wr_reward(self, agent, world):
@@ -60,15 +64,18 @@ class Scenario():
             return off_rew + def_rew + time_penalty
     
     def db_reward(self, agent, world):
+        #TODO: change to be just nearest/assigned receiver instead of all offensive players
         offensive_players = self.offensive_players(world)
         def_rew = -sum(np.sqrt(np.sum(np.square(agent.location - a.location)))
                       for a in offensive_players)
         return def_rew
     
     def lb_reward(self, agent, world):
+        #TODO: Determine a reward function for LB
         pass
     
     def dl_reward(self, agent, world):
+        # reward = -dist(agent, QB)
         pass
 
     def step_reward(self, agent, world):
