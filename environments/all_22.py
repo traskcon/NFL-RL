@@ -43,7 +43,11 @@ class Scenario():
 
     def ol_reward(self, agent, world):
         # reward = sum(dist(DL, QB))
-        pass
+        dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
+        qb = [player for player in world.agents if player.position == "QB"][0]
+        ol_rew = -sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
+                      for a in dl_players)
+        return ol_rew
 
     def wr_reward(self, agent, world):
         # Reward WR by how close they are to landmark and how far DB is from them
