@@ -68,11 +68,11 @@ class Scenario():
             return off_rew + def_rew + time_penalty
     
     def db_reward(self, agent, world):
-        #TODO: change to be just nearest/assigned receiver instead of all offensive players
-        offensive_players = self.offensive_players(world)
-        def_rew = -sum(np.sqrt(np.sum(np.square(agent.location - a.location)))
-                      for a in offensive_players)
-        return def_rew
+        #Reward is distance from closest WR
+        receivers = [player for player in self.offensive_players(world) if player.position == "WR"]
+        db_rew = -np.min(np.sqrt(np.sum(np.square(agent.location - a.location)))
+                      for a in receivers)
+        return db_rew
     
     def lb_reward(self, agent, world):
         #TODO: Determine a reward function for LB
@@ -126,6 +126,7 @@ class Scenario():
         # CSV file containing player starting locations for different plays
         #routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
         #landmark.location = routes["slant/in"]
+        # TODO: Add flag indicating whether a player is eligible or not, use that for coverage rewards
         play = pd.read_csv(file)
         for i, agent in enumerate(world.agents):
             row = play.index[play["position"] == agent.index].to_list()[0]
