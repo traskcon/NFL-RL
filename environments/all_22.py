@@ -45,7 +45,7 @@ class Scenario():
         # reward = sum(dist(DL, QB))
         dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
         qb = [player for player in world.agents if player.position == "QB"][0]
-        ol_rew = -sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
+        ol_rew = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
                       for a in dl_players)
         return ol_rew
 
@@ -80,7 +80,9 @@ class Scenario():
     
     def dl_reward(self, agent, world):
         # reward = -dist(agent, QB)
-        pass
+        qb = [player for player in world.agents if player.position == "QB"][0]
+        dl_rew = -np.sqrt(np.sum(np.square(agent.location - qb.location)))
+        return dl_rew
 
     def step_reward(self, agent, world):
         #Position-specific reward given at each timestep during a play (reward-shaping)
