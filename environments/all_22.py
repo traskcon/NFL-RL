@@ -23,8 +23,6 @@ class Scenario():
     
     def reset_world(self, world):
         world.timestep = 0
-        # Initial positions for landmark, agents
-        goal = np.random.choice(world.landmarks)
         # Can build formations as an argument here
         self.load_play(world)
         self.yardline = 30
@@ -69,9 +67,8 @@ class Scenario():
     
     def db_reward(self, agent, world):
         #Reward is distance from closest WR
-        receivers = [player for player in self.offensive_players(world) if player.position == "WR"]
-        db_rew = -np.min(np.sqrt(np.sum(np.square(agent.location - a.location)))
-                      for a in receivers)
+        receivers = [player.location for player in self.offensive_players(world) if player.position == "WR"]
+        db_rew = -1*np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in receivers])
         return db_rew
     
     def lb_reward(self, agent, world):
@@ -84,7 +81,7 @@ class Scenario():
         dl_rew = -np.sqrt(np.sum(np.square(agent.location - qb.location)))
         return dl_rew
 
-    def step_reward(self, agent, world):
+    def reward(self, agent, world):
         #Position-specific reward given at each timestep during a play (reward-shaping)
         reward_dict = {
             "QB": self.qb_reward,
