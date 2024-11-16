@@ -8,8 +8,6 @@ import keras
 import copy
 
 class Policy():
-    # NOTE: Each agent should have its own policy, observations in order to minimize Q_table size 
-    # for full simulation. Initial example uses a common q_table for all agents
     def __init__(self, env, observations):
         # Environment state is a tuple of n 1x2 np arrays containing each agent's position
         self.env = env
