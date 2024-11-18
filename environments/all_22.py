@@ -22,6 +22,8 @@ class Scenario():
         return world
     
     def reset_world(self, world):
+        # Will need multiple reset functions
+        # One to reset to start of the play, one for start of the drive, and one for start of game
         world.timestep = 0
         # Can build formations as an argument here
         self.load_play(world)

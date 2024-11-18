@@ -1,4 +1,5 @@
-'''Store common classes'''
+'''Store common classes
+TODO: Remove scaffolding and rewrite to be GRIDIRON specific'''
 import numpy as np
 
 class Entity():
@@ -12,6 +13,7 @@ class Entity():
 class Agent(Entity):
     def __init__(self):
        super().__init__()
+       #TODO: Remove movable parameter, add other common parameters
        self.movable = True 
        self.defense = False
        self.position = None
@@ -26,5 +28,6 @@ class World():
         #Future parameters added as needed to support continuous movement
 
 class Landmark(Entity):
+    #TODO: Remove as a class, add "target_location" parameter to Agent
     def __init__(self):
         super().__init__()
