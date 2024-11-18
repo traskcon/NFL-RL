@@ -26,8 +26,3 @@ class World():
         self.agents = []
         self.landmarks = []
         #Future parameters added as needed to support continuous movement
-
-class Landmark(Entity):
-    #TODO: Remove as a class, add "target_location" parameter to Agent
-    def __init__(self):
-        super().__init__()

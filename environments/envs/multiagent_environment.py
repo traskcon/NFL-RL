@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from gymnasium import spaces
 import pygame
-from environments.utils.core import Agent, Landmark, World
+from environments.utils.core import Agent, World
 from pettingzoo import ParallelEnv
 
 class MultiEnvironment(ParallelEnv):
@@ -71,7 +71,7 @@ class MultiEnvironment(ParallelEnv):
 
         self.rewards = {name: 0.0 for name in self.agent_names}
         self.terminations = {name: False for name in self.agent_names}
-        self.target_location = self.world.agents[0].goal.location
+        self.target_location = self.world.agents[0].target_location
 
         observations = {a.name:(
             *[agent.location for agent in self.world.agents],
@@ -147,7 +147,7 @@ class MultiEnvironment(ParallelEnv):
         # Check if an offensive player has stepped out of bounds
         # TODO: Add code checking if ballcarrier scored a touchdown
         if not agent.defense:
-            if np.sum(np.square(agent.location - agent.goal.location)) == 0:
+            if np.sum(np.square(agent.location - agent.target_location)) == 0:
                 return True #End simulation if WR reaches target
             else:
                 self.check_bounds(agent)

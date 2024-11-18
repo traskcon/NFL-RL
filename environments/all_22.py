@@ -1,5 +1,5 @@
 import numpy as np
-from environments.utils.core import Agent, Landmark, World
+from environments.utils.core import Agent, World
 import pandas as pd
 
 class Scenario():
@@ -7,18 +7,10 @@ class Scenario():
         world = World()
         num_agents = N
         world.num_agents = num_agents
-        num_landmarks = 1
         world.timestep = None
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
         self.load_roster(world, roster)
-        # Add landmarks
-        world.landmarks = [Landmark() for i in range(num_landmarks)]
-        for i, landmark in enumerate(world.landmarks):
-            landmark.name = "landmark %d" % i
-            landmark.collide = False
-            landmark.movable = False
-            landmark.location = np.array([None, None])
         return world
     
     def reset_world(self, world):
@@ -63,7 +55,7 @@ class Scenario():
             defensive_players = self.defensive_players(world)
             def_rew = 0.0001 * sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                             for a in defensive_players)
-            off_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.goal.location)))
+            off_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.target_location)))
             time_penalty = -((world.timestep/10)**2) #Average NFL play lasts ~5s, motivate WR to get to target quickly
             return off_rew + def_rew + time_penalty
     
@@ -121,7 +113,6 @@ class Scenario():
             position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
             agent.index = f"{agent.position}_{position_counts[agent.position]}"
             agent.location = np.array([None, None])
-            agent.goal = Landmark()
 
     def load_play(self, world, file="Test-Playbook.csv"):
         # CSV file containing player starting locations for different plays
@@ -132,4 +123,4 @@ class Scenario():
         for i, agent in enumerate(world.agents):
             row = play.index[play["position"] == agent.index].to_list()[0]
             agent.location = np.array([play.at[row,"x"],play.at[row,"y"]])
-            agent.goal.location = np.array([play.at[row,"goal_x"], play.at[row,"goal_y"]])
+            agent.target_location = np.array([play.at[row,"goal_x"], play.at[row,"goal_y"]])
