@@ -34,7 +34,7 @@ class Scenario():
         # Currently doing well = positive reward values
         if agent.oob:
             return -100 #Large pentalty for stepping out of bounds
-        elif np.sum(np.square(agent.location - agent.goal.location)) == 0:
+        elif np.sum(np.square(agent.location - agent.target_location)) == 0:
             # If agent reaches target, give them a big reward
             return 50
         else:
