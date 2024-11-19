@@ -2,21 +2,17 @@
 TODO: Remove scaffolding and rewrite to be GRIDIRON specific'''
 import numpy as np
 
-class Entity():
+class Agent():
     def __init__(self):
-        self.name = ""
-        self.collide = True
-        self.color = None
-        self.location = None
-
-class Agent(Entity):
-    def __init__(self):
-       super().__init__()
        #TODO: Add other common parameters
        self.defense = False
        self.position = None
        self.ballcarrier = False
        self.oob = False
+       self.location = np.array([None, None])
+       self.collide = True
+       self.color = None
+       self.name = ""
 
 
 class World():
