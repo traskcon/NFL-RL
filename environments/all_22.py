@@ -112,7 +112,6 @@ class Scenario():
             agent.defense = True if agent.position in ["DB","DL","LB"] else False
             position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
             agent.index = f"{agent.position}_{position_counts[agent.position]}"
-            agent.location = np.array([None, None])
 
     def load_play(self, world, file="Test-Playbook.csv"):
         # CSV file containing player starting locations for different plays

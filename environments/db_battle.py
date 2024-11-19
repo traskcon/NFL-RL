@@ -16,7 +16,6 @@ class Scenario():
             agent.defense = False if i < num_defense else True
             base_index = i if i < num_defense else int(i - num_defense)
             agent.name = f"{agent.position}_{base_index}"
-            agent.location = np.array([None, None])
         return world
     
     def reset_world(self, world):
