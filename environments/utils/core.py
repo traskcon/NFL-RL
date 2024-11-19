@@ -5,7 +5,6 @@ import numpy as np
 class Entity():
     def __init__(self):
         self.name = ""
-        self.movable = False
         self.collide = True
         self.color = None
         self.location = None
@@ -13,8 +12,7 @@ class Entity():
 class Agent(Entity):
     def __init__(self):
        super().__init__()
-       #TODO: Remove movable parameter, add other common parameters
-       self.movable = True 
+       #TODO: Add other common parameters
        self.defense = False
        self.position = None
        self.ballcarrier = False
