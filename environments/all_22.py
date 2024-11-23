@@ -122,8 +122,14 @@ class Scenario():
         return db_rew
     
     def lb_reward(self, agent, world):
-        #TODO: Determine a reward function for LB
-        pass
+        #Using a modified WR reward function as an approximator for zone coverage
+        # Cover anybody who comes close to zone landmark
+        receivers = [player.location for player in self.offensive_players(world)]
+        # Define zone as 10x10 box centered on target location
+        zone = np.array([agent.target_location-5, agent.target_location+5])
+        coverage_rew = -1*np.min(np.sqrt(np.sum(np.square(agent.location - loc))) for loc in receivers if self.check_in_box(zone, loc))
+        zone_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.target_location)))
+        return coverage_rew + zone_rew
     
     def dl_reward(self, agent, world):
         # reward = -dist(agent, QB)
