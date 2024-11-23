@@ -72,5 +72,6 @@ class Scenario():
             agent.strength = roster["strength"][i]
             agent.team = roster["team"][i]
 
-    def update_agent_states(self):
+    def update_agent_states(self, world):
+        # Exists to ensure backwards-compatability (Needed for All-22 simulation)
         pass

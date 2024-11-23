@@ -25,8 +25,12 @@ class Scenario():
         self.pocket = np.array([[qb.location[0]-3, qb.location[1]+3],
                                 [qb.location[0]+3, qb.location[1]-3]])
         
-    def update_agent_states(self):
-        pass
+    def update_agent_states(self, world):
+        for player in world.agents:
+            if player.position == "QB":
+                # If QB is in the pocket, set their status as passing
+                player.passing = self.check_in_box(self.pocket, player.location)
+            # Add catching, handoff, and fumble functions here to change ballcarrier
         
     def check_in_box(self, bounding_box, point):
         # Given a 2D point and a bounding box defined by [[x1, y1], [x2, y2]], return whether the point is within the box
