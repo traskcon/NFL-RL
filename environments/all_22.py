@@ -26,6 +26,7 @@ class Scenario():
         qb = [player for player in world.agents if player.position == "QB"][0]
         self.pocket = np.array([[qb.location[0]-3, qb.location[1]+3],
                                 [qb.location[0]+3, qb.location[1]-3]])
+        self.update_agent_states(world)
         
     def update_agent_states(self, world):
         for player in world.agents:
@@ -44,7 +45,7 @@ class Scenario():
         
     def check_in_box(self, bounding_box, point):
         # Given a 2D point and a bounding box defined by [[x1, y1], [x2, y2]], return whether the point is within the box
-        return ((point>=bounding_box[0]) & (point<=bounding_box[1])).all(1)
+        return ((point>=bounding_box[0]) & (point<=bounding_box[1])).all()
 
     def qb_reward(self, agent, world):
         #QB has a two-level reward probably
@@ -67,7 +68,7 @@ class Scenario():
         # Currently identical to WR reward
         if agent.oob:
             return -100 #Large pentalty for stepping out of bounds
-        elif np.sum(np.square(agent.location - agent.goal.location)) == 0:
+        elif np.sum(np.square(agent.location - agent.target_location)) == 0:
             # If agent reaches target, give them a big reward
             return 50
         else:
@@ -102,7 +103,7 @@ class Scenario():
         # Currently doing well = positive reward values
         if agent.oob:
             return -100 #Large pentalty for stepping out of bounds
-        elif np.sum(np.square(agent.location - agent.goal.location)) == 0:
+        elif np.sum(np.square(agent.location - agent.target_location)) == 0:
             # If agent reaches target, give them a big reward
             return 50
         else:
@@ -127,7 +128,7 @@ class Scenario():
         receivers = [player.location for player in self.offensive_players(world)]
         # Define zone as 10x10 box centered on target location
         zone = np.array([agent.target_location-5, agent.target_location+5])
-        coverage_rew = -1*np.min(np.sqrt(np.sum(np.square(agent.location - loc))) for loc in receivers if self.check_in_box(zone, loc))
+        coverage_rew = -1*sum([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in receivers if self.check_in_box(zone, loc)])
         zone_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.target_location)))
         return coverage_rew + zone_rew
     

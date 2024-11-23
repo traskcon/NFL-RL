@@ -298,4 +298,4 @@ class MultiEnvironment(ParallelEnv):
     
     def check_in_box(self, bounding_box, point):
         # Given a 2D point and a bounding box defined by [[x1, y1], [x2, y2]], return whether the point is within the box
-        return ((point>=bounding_box[0]) & (point<=bounding_box[1])).all(1)
+        return ((point>=bounding_box[0]) & (point<=bounding_box[1])).all()
