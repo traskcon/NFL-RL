@@ -82,7 +82,12 @@ class Scenario():
 
     def te_reward(self, agent, world):
         # TE reward depends on playcall (Blocking or route-running)
-        pass
+        # For now just use OL reward and assume blocking
+        dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
+        qb = [player for player in world.agents if player.position == "QB"][0]
+        ol_rew = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
+                      for a in dl_players)
+        return ol_rew
 
     def ol_reward(self, agent, world):
         # reward = sum(dist(DL, QB))
