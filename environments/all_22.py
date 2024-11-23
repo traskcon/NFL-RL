@@ -40,12 +40,18 @@ class Scenario():
         #QB has a two-level reward probably
         #Encode two states for QB: Passing & Scrambling
         if agent.passing:
-            # If QB is in passing mode, reward them for staying away from DL, in the pocket
+            # If QB is in passing mode, reward them for staying away from DL
+            # May need to add reward to encourage QB to stay in the pocket
             dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
-            qb = [player for player in world.agents if player.position == "QB"][0]
-            ol_rew = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
+            ol_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in dl_players)
             return ol_rew
+        else:
+            # Otherwise reward them for getting downfield, avoiding nearest defender
+            downfield_rew = agent.location[0] - self.yardline
+            defense = [player.location for player in self.defensive_players(world)]
+            evasion_rew = np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in defense])
+            return downfield_rew + evasion_rew
 
     def rb_reward(self, agent, world):
         # Currently identical to WR reward
