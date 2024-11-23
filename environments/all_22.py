@@ -20,10 +20,28 @@ class Scenario():
         # Can build formations as an argument here
         self.load_play(world)
         self.yardline = 30
+        # Define the pocket as a 6-yard wide box around QB's initial position
+        qb = [player for player in world.agents if player.position == "QB"][0]
+        self.pocket = np.array([[qb.location[0]-3, qb.location[1]+3],
+                                [qb.location[0]+3, qb.location[1]-3]])
+        
+    def update_agent_states(self):
+        pass
+        
+    def check_in_box(self, bounding_box, point):
+        # Given a 2D point and a bounding box defined by [[x1, y1], [x2, y2]], return whether the point is within the box
+        return ((point>=bounding_box[0]) & (point<=bounding_box[1])).all(1)
 
     def qb_reward(self, agent, world):
         #QB has a two-level reward probably
-        pass
+        #Encode two states for QB: Passing & Scrambling
+        if agent.passing:
+            # If QB is in passing mode, reward them for staying away from DL, in the pocket
+            dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
+            qb = [player for player in world.agents if player.position == "QB"][0]
+            ol_rew = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
+                        for a in dl_players)
+            return ol_rew
 
     def rb_reward(self, agent, world):
         # Currently identical to WR reward

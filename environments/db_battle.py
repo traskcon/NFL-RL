@@ -71,3 +71,6 @@ class Scenario():
             agent.position = roster["position"][i]
             agent.strength = roster["strength"][i]
             agent.team = roster["team"][i]
+
+    def update_agent_states(self):
+        pass

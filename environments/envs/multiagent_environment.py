@@ -112,6 +112,9 @@ class MultiEnvironment(ParallelEnv):
                     agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
                 )
 
+        # Update each agent's position-specific states (passing vs scrambling, ballcarrier)
+        self.scenario.update_agent_states()
+
         # Check termination conditions
         for agent in self.world.agents:
             self.terminations[agent.name] = self.termination(agent)
