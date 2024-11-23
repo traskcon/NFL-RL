@@ -1,10 +1,8 @@
-'''Store common classes
-TODO: Remove scaffolding and rewrite to be GRIDIRON specific'''
+'''Store common classes'''
 import numpy as np
 
 class Agent():
     def __init__(self):
-       #TODO: Add other common parameters
        self.defense = False
        self.position = None
        self.ballcarrier = False
@@ -13,6 +11,7 @@ class Agent():
        self.collide = True
        self.color = None
        self.name = ""
+       self.strength = 0
 
 
 class World():
