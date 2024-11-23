@@ -26,8 +26,21 @@ class Scenario():
         pass
 
     def rb_reward(self, agent, world):
-        # Probably just use WR reward
-        pass
+        # Currently identical to WR reward
+        if agent.oob:
+            return -100 #Large pentalty for stepping out of bounds
+        elif np.sum(np.square(agent.location - agent.goal.location)) == 0:
+            # If agent reaches target, give them a big reward
+            return 50
+        else:
+            # Scale each component of the agent reward separately
+            # Ex. 10 times more important to reach goal than to avoid CB
+            defensive_players = self.defensive_players(world)
+            def_rew = 0.0001 * sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
+                            for a in defensive_players)
+            off_rew = -0.01 * np.sqrt(np.sum(np.square(agent.location - agent.target_location)))
+            time_penalty = -((world.timestep/10)**2) #Average NFL play lasts ~5s, motivate WR to get to target quickly
+            return off_rew + def_rew + time_penalty
 
     def te_reward(self, agent, world):
         # TE reward depends on playcall (Blocking or route-running)
