@@ -147,22 +147,22 @@ class MultiEnvironment(ParallelEnv):
         return observations, self.rewards, self.terminations, truncations, infos
     
     def termination(self, agent):
-        # Check if an offensive player has stepped out of bounds
-        # TODO: Add code checking if ballcarrier scored a touchdown
-        if not agent.defense:
-            if np.sum(np.square(agent.location - agent.target_location)) == 0:
-                return True #End simulation if WR reaches target
-            else:
+        # First check for scenario-specific terminations
+        if self.scenario.termination(agent):
+            return True
+        else:
+            # Check if an offensive player has stepped out of bounds
+            if not agent.defense:
                 self.check_bounds(agent)
                 return agent.oob
-        else:
-            return False
+            else:
+                return False
         
     def check_bounds(self, agent):
-        # Check if a player has stepped out of bounds
-        min_bounds = 1, 1 #min_width, min_length (zero-indexed)
-        max_bounds = self.width - 2, self.length - 2
-        agent.oob = ((agent.location <= min_bounds).any() or (agent.location >= max_bounds).any())
+        # Check if a player has stepped out of bounds by seeing if they've left the field of play
+        field_of_play = np.array([[2,2],
+                                  [self.width-2, self.length-2]])
+        agent.oob = not self.check_in_box(field_of_play, agent.location) 
 
     def render(self):
         if self.render_mode == "rgb_array":
@@ -295,3 +295,7 @@ class MultiEnvironment(ParallelEnv):
     
     def action_space(self, agent):
         return self.action_spaces[agent.name]
+    
+    def check_in_box(self, bounding_box, point):
+        # Given a 2D point and a bounding box defined by [[x1, y1], [x2, y2]], return whether the point is within the box
+        return ((point>=bounding_box[0]) & (point<=bounding_box[1])).all(1)

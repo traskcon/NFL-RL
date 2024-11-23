@@ -20,6 +20,8 @@ class Scenario():
         # Can build formations as an argument here
         self.load_play(world)
         self.yardline = 30
+        self.active_endzone = np.array([[112,2],
+                                        [122,55]]) #Hard-coded rn, fix in future to vary with environment
         # Define the pocket as a 6-yard wide box around QB's initial position
         qb = [player for player in world.agents if player.position == "QB"][0]
         self.pocket = np.array([[qb.location[0]-3, qb.location[1]+3],
@@ -31,6 +33,14 @@ class Scenario():
                 # If QB is in the pocket, set their status as passing
                 player.passing = self.check_in_box(self.pocket, player.location)
             # Add catching, handoff, and fumble functions here to change ballcarrier
+
+    def termination(self, agent): 
+        if agent.ballcarrier:
+            if self.check_in_box(self.active_endzone, agent.location):
+                return True #End if touchdown is scored
+            #TODO: Add code to check if ballcarrier has been tackled
+        else:
+            return False
         
     def check_in_box(self, bounding_box, point):
         # Given a 2D point and a bounding box defined by [[x1, y1], [x2, y2]], return whether the point is within the box
