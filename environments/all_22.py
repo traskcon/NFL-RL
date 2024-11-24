@@ -33,13 +33,22 @@ class Scenario():
             if player.position == "QB":
                 # If QB is in the pocket, set their status as passing
                 player.passing = self.check_in_box(self.pocket, player.location)
+                # Need to determine how QB decides who to pass to
             # Add catching, handoff, and fumble functions here to change ballcarrier
 
-    def termination(self, agent): 
+    def termination(self, agent, world): 
         if agent.ballcarrier:
             if self.check_in_box(self.active_endzone, agent.location):
                 return True #End if touchdown is scored
-            #TODO: Add code to check if ballcarrier has been tackled
+            else:
+                # Check if any defenders are adjacent
+                tackle_box = np.array([agent.location-1, agent.location+1])
+                tacklers = [defense for defense in self.defensive_players(world) if self.check_in_box(tackle_box, defense.location)]
+                for tackler in tacklers:
+                    tackle_diff = tackler.tackle - agent.break_tackle
+                    if tackle_diff >= np.random.randn()*10:
+                        #Sampling from normal distribution, potentially readjust based on sim results
+                        return True
         else:
             return False
         
@@ -172,6 +181,8 @@ class Scenario():
             agent.name = roster["name"][i]
             agent.strength = roster["strength"][i]
             agent.team = roster["team"][i]
+            agent.tackle = roster["tackle"][i]
+            agent.break_tackle = roster["break_tackle"][i]
             agent.defense = True if agent.position in ["DB","DL","LB"] else False
             position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
             agent.index = f"{agent.position}_{position_counts[agent.position]}"

@@ -148,7 +148,7 @@ class MultiEnvironment(ParallelEnv):
     
     def termination(self, agent):
         # First check for scenario-specific terminations
-        if self.scenario.termination(agent):
+        if self.scenario.termination(agent, self.world):
             return True
         else:
             # Check if an offensive player has stepped out of bounds
