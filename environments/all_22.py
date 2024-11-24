@@ -26,6 +26,7 @@ class Scenario():
         qb = [player for player in world.agents if player.position == "QB"][0]
         self.pocket = np.array([[qb.location[0]-3, qb.location[1]+3],
                                 [qb.location[0]+3, qb.location[1]-3]])
+        qb.ballcarrier = True #Define QB as ballcarrier at start of the play
         self.update_agent_states(world)
         
     def update_agent_states(self, world):
@@ -48,6 +49,7 @@ class Scenario():
                     tackle_diff = tackler.tackle - agent.break_tackle
                     if tackle_diff >= np.random.randn()*10:
                         #Sampling from normal distribution, potentially readjust based on sim results
+                        print("{} tackled {} at the {} yardline".format(tackler.name, agent.name, agent.location[0]))
                         return True
         else:
             return False
