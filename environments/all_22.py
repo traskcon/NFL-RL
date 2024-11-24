@@ -24,8 +24,7 @@ class Scenario():
                                         [122,55]]) #Hard-coded rn, fix in future to vary with environment
         # Define the pocket as a 6-yard wide box around QB's initial position
         qb = [player for player in world.agents if player.position == "QB"][0]
-        self.pocket = np.array([[qb.location[0]-3, qb.location[1]+3],
-                                [qb.location[0]+3, qb.location[1]-3]])
+        self.pocket = np.array([qb.location-3, qb.location+3])
         qb.ballcarrier = True #Define QB as ballcarrier at start of the play
         self.update_agent_states(world)
         
@@ -102,12 +101,15 @@ class Scenario():
         return ol_rew
 
     def ol_reward(self, agent, world):
-        # reward = sum(dist(DL, QB))
+        # Intiial reward: reward = sum(dist(DL, QB))
+        # Reworked reward: reward = min(dist(DL, OL))
+        # Reworked reward works well as a run-blocking reward, since the OL will just charge at DL
         dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
         qb = [player for player in world.agents if player.position == "QB"][0]
-        ol_rew = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
+        pass_pro = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
                       for a in dl_players)
-        return ol_rew
+        run_block = -1*np.min([np.sqrt(np.sum(np.square(agent.location - dl.location))) for dl in dl_players])
+        return pass_pro + run_block
 
     def wr_reward(self, agent, world):
         # Reward WR by how close they are to landmark and how far DB is from them
