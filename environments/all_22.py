@@ -137,21 +137,43 @@ class Scenario():
         qb = [player for player in world.agents if player.position == "QB"][0]
         dl_rew = -np.sqrt(np.sum(np.square(agent.location - qb.location)))
         return dl_rew
+    
+    def bc_reward(self, agent, world):
+        # Reward function for ballcarriers, incentivize running towards endzone, away from defense
+        forward_progress = agent.location[0] - self.yardline
+        def_loc = [player.location for player in self.defensive_players(world)]
+        evasion = np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in def_loc])
+        return forward_progress + evasion
+    
+    def pursuit_reward(self, agent, world):
+        # Reward function for defense chasing the ballcarrier
+        ballcarrier = [player for player in world.agents if player.ballcarrier][0]
+        pursuit = -1*np.sqrt(np.sum(np.square(agent.location - ballcarrier.location)))
+        return pursuit
 
     def reward(self, agent, world):
         #Position-specific reward given at each timestep during a play (reward-shaping)
-        reward_dict = {
-            "QB": self.qb_reward,
-            "RB": self.rb_reward,
-            "TE": self.te_reward,
-            "OL": self.ol_reward,
-            "WR": self.wr_reward,
-            "DB": self.db_reward,
-            "LB": self.lb_reward,
-            "DL": self.dl_reward,
-        }
-        reward_func = reward_dict[agent.position]
-        return reward_func(agent, world)
+        ballcarrier = [player for player in world.agents if player.ballcarrier][0]
+        if (ballcarrier.location[0] > self.yardline) and (agent.defense or agent.ballcarrier):
+            # If ballcarrier is past the line of scrimmage, return special ballcarrier and defense rewards
+            if agent.defense:
+                return self.pursuit_reward(agent, world)
+            elif agent.ballcarrier:
+                return self.bc_reward(agent, world)
+        else:
+            # Otherwise return standard position rewards
+            reward_dict = {
+                "QB": self.qb_reward,
+                "RB": self.rb_reward,
+                "TE": self.te_reward,
+                "OL": self.ol_reward,
+                "WR": self.wr_reward,
+                "DB": self.db_reward,
+                "LB": self.lb_reward,
+                "DL": self.dl_reward,
+            }
+            reward_func = reward_dict[agent.position]
+            return reward_func(agent, world)
     
     def play_reward(self, agent, world):
         #Reward based on TD, turnover, EPA
