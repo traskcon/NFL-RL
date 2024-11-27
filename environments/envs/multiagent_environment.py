@@ -75,7 +75,7 @@ class MultiEnvironment(ParallelEnv):
 
         observations = {a.name:(
             *[agent.location for agent in self.world.agents],
-            self.target_location,
+            a.target_location,
         ) for a in self.world.agents}
 
         # Get dummy infos. Necessary for proper parallel_to_aec conversion
@@ -131,7 +131,7 @@ class MultiEnvironment(ParallelEnv):
         # Get observations
         observations = {a.name: (
             *[agent.location for agent in self.world.agents],
-            self.target_location - a.location,
+            a.target_location - a.location,
         ) for a in self.world.agents}
 
         # Get dummy infos
