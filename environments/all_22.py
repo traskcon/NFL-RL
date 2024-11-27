@@ -53,6 +53,9 @@ class Scenario():
         if agent.passing:
             # If QB is in passing mode, reward them for staying away from DL
             # May need to add reward to encourage QB to stay in the pocket
+            # TODO: (Performance Improvement) Since players positions in the list don't change during play,
+            # The defense and QB can be indexed once at the start of each play, instead of having to use list comprehension to find everytime
+            # Can also have a world.ballcarrier_index variable that contains the position of the current ballcarrier
             dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
             ol_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in dl_players)
@@ -178,6 +181,7 @@ class Scenario():
     def play_reward(self, agent, world):
         #Reward based on TD, turnover, EPA
         #Calculate EPA using ep_model.py
+        # HOLD FOR FUTURE PLAYCALLING AI
         pass
 
     def defensive_players(self, world):
