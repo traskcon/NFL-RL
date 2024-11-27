@@ -26,6 +26,9 @@ testbed.py
 demonstration.py
 * Used to visualize trained agents
 
+Scenario (db_battle.py, all_22.py)
+* Contain specific functions, rules for simulating a certain scenario
+
 environments
 * envs
     * multiagent_environment.py
