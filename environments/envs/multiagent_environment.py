@@ -78,13 +78,10 @@ class MultiEnvironment(ParallelEnv):
             a.target_location,
         ) for a in self.world.agents}
 
-        # Get dummy infos. Necessary for proper parallel_to_aec conversion
-        infos = {name: {} for name in self.agent_names}
-
         if self.render_mode == "human":
             self._render_frame()
 
-        return observations, infos
+        return observations
 
     def step(self, actions):
         '''Set action for all agents, update relevant states'''
@@ -134,9 +131,6 @@ class MultiEnvironment(ParallelEnv):
             a.target_location - a.location,
         ) for a in self.world.agents}
 
-        # Get dummy infos
-        infos = {name: {} for name in self.agent_names}
-
         if any(self.terminations.values()) or all(truncations.values()):
             # If termination/truncation condition met, remove all agents
             self.world.agents = []
@@ -144,7 +138,7 @@ class MultiEnvironment(ParallelEnv):
         if self.render_mode == "human":
             self._render_frame()
         
-        return observations, self.rewards, self.terminations, truncations, infos
+        return observations, self.rewards, self.terminations, truncations
     
     def termination(self, agent):
         # First check for scenario-specific terminations

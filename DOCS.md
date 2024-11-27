@@ -54,7 +54,7 @@ Agents
     * Location (np.array([int, int])) - Player's location on the field
     * Defense (bool) - Whether player is on defense or not
     * Index (str) - Player position + index (ex. WR_1, WR_2)
-    * Goal (Landmark) - Player's target 
+    * Target Location - Player's target 
 
 ### Demonstration Code Flow
 
