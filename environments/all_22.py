@@ -20,12 +20,14 @@ class Scenario():
         # Can build formations as an argument here
         self.load_play(world)
         self.yardline = 30
+        world.yardline = 30
         self.active_endzone = np.array([[112,2],
                                         [122,55]]) #Hard-coded rn, fix in future to vary with environment
         # Define the pocket as a 6-yard wide box around QB's initial position
         qb = [player for player in world.agents if player.position == "QB"][0]
         self.pocket = np.array([[qb.location[0]-3, qb.location[1]+3],
                                 [qb.location[0]+3, qb.location[1]-3]])
+        qb.ballcarrier = True # QB starts with the ball
         self.update_agent_states(world)
         
     def update_agent_states(self, world):
