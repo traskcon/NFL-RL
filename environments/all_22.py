@@ -24,10 +24,18 @@ class Scenario():
         self.active_endzone = np.array([[112,2],
                                         [122,55]]) #Hard-coded rn, fix in future to vary with environment
         # Define the pocket as a 6-yard wide box around QB's initial position
-        qb = [player for player in world.agents if player.position == "QB"][0]
+        # Index the QB, DL once at game start instead of everytime reward function is run
+        self.qb_index = self.get_player_indices(world, ["QB"])[0]
+        self.dl_indices = self.get_player_indices(world, ["DL"])
+        self.wr_indices = self.get_player_indices(world, ["WR"])
+        qb = world.agents[self.qb_index]
         self.pocket = np.array([qb.location-3, qb.location+3])
         qb.ballcarrier = True #Define QB as ballcarrier at start of the play
         self.update_agent_states(world)
+
+    def get_player_indices(self, world, position):
+        # Return a list of player indices from world.agents based on player position
+        return [index for index, player in enumerate(world.agents) if player.position in position]
         
     def update_agent_states(self, world):
         for player in world.agents:
@@ -64,10 +72,7 @@ class Scenario():
         if agent.passing:
             # If QB is in passing mode, reward them for staying away from DL
             # May need to add reward to encourage QB to stay in the pocket
-            # TODO: (Performance Improvement) Since players positions in the list don't change during play,
-            # The defense and QB can be indexed once at the start of each play, instead of having to use list comprehension to find everytime
-            # Can also have a world.ballcarrier_index variable that contains the position of the current ballcarrier
-            dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
+            dl_players = [world.agents[i] for i in self.dl_indices]
             ol_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in dl_players)
             return ol_rew
@@ -76,7 +81,7 @@ class Scenario():
             downfield_rew = agent.location[0] - self.yardline
             defense = [player.location for player in self.defensive_players(world)]
             evasion_rew = np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in defense])
-            return downfield_rew + evasion_rew
+            return downfield_rew + 0.1 * evasion_rew
 
     def rb_reward(self, agent, world):
         # Currently identical to WR reward
@@ -98,7 +103,7 @@ class Scenario():
     def te_reward(self, agent, world):
         # TE reward depends on playcall (Blocking or route-running)
         # For now just use OL reward and assume blocking
-        dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
+        dl_players = [world.agents[i] for i in self.dl_indices]
         qb = [player for player in world.agents if player.position == "QB"][0]
         ol_rew = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
                       for a in dl_players)
@@ -106,10 +111,10 @@ class Scenario():
 
     def ol_reward(self, agent, world):
         # Intiial reward: reward = sum(dist(DL, QB))
-        # Reworked reward: reward = min(dist(DL, OL))
-        # Reworked reward works well as a run-blocking reward, since the OL will just charge at DL
-        dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
-        qb = [player for player in world.agents if player.position == "QB"][0]
+        # Reworked reward: reward = min(dist(DL, OL)) + sum(dist(DL, QB))
+        # Pocket breaks down very quickly, likely need to change movement speed to prevent that
+        dl_players = [world.agents[i] for i in self.dl_indices]
+        qb = world.agents[self.qb_index]
         pass_pro = sum(np.sqrt(np.sum(np.square(a.location - qb.location)))
                       for a in dl_players)
         run_block = -1*np.min([np.sqrt(np.sum(np.square(agent.location - dl.location))) for dl in dl_players])
@@ -135,8 +140,8 @@ class Scenario():
     
     def db_reward(self, agent, world):
         #Reward is distance from closest WR
-        receivers = [player.location for player in self.offensive_players(world) if player.position == "WR"]
-        db_rew = -1*np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in receivers])
+        receivers = [world.agents[i] for i in self.wr_indices]
+        db_rew = -1*np.min([np.sqrt(np.sum(np.square(agent.location - loc.location))) for loc in receivers])
         return db_rew
     
     def lb_reward(self, agent, world):
@@ -151,7 +156,7 @@ class Scenario():
     
     def dl_reward(self, agent, world):
         # reward = -dist(agent, QB)
-        qb = [player for player in world.agents if player.position == "QB"][0]
+        qb = world.agents[self.qb_index]
         dl_rew = -np.sqrt(np.sum(np.square(agent.location - qb.location)))
         return dl_rew
     

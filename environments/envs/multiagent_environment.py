@@ -98,7 +98,8 @@ class MultiEnvironment(ParallelEnv):
                 strength_diff = agent.strength - opp_agent.strength
                 #Sampling from normal distribution
                 if strength_diff >= np.random.randn()*10:
-                    print("{} pushed {} backwards".format(agent.name, opp_agent.name))
+                    # Print option for debugging
+                    # print("{} pushed {} backwards".format(agent.name, opp_agent.name))
                     # Push opponent backwards
                     opp_agent.location = opp_agent.location + agent_direction
                     # Use np.clip to ensure we don't leave the grid
