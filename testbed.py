@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 scenario = multiagent_environment.Scenario()
 env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 100, render_mode=None)
-observations, infos = env.reset()
+observations = env.reset()
 learner = policy.Policy(env, observations)
 
 train_episodes = 1000
@@ -24,7 +24,7 @@ cumulative_rewards = {agent.name: [] for agent in env.world.agents}
 q_loss = {agent.name: [] for agent in env.world.agents}
 
 for episode in tqdm(range(train_episodes)):
-    observations, infos = env.reset()
+    observations = env.reset()
     for agent in env.world.agents:
         cumulative_rewards[agent.name].append(0)
     while env.world.agents:
@@ -35,7 +35,7 @@ for episode in tqdm(range(train_episodes)):
         else:
             actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn") 
                        for agent in env.world.agents}
-        new_observations, rewards, terminations, truncations, infos = env.step(actions)
+        new_observations, rewards, terminations, truncations = env.step(actions)
         for agent in env.world.agents:
             cumulative_rewards[agent.name][-1] += rewards[agent.name]
         replay_memory.append([observations, actions, rewards, new_observations, terminations])

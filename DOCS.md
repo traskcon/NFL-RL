@@ -54,7 +54,24 @@ Agents
     * Location (np.array([int, int])) - Player's location on the field
     * Defense (bool) - Whether player is on defense or not
     * Index (str) - Player position + index (ex. WR_1, WR_2)
-    * Goal (Landmark) - Player's target 
+    * Target Location - Player's target 
+
+### Demonstration Code Flow
+
+This section is intended to give a high-level overview of how the GRIDIRON system functions in its demonstration mode.
+1. Initialize the environment
+    1. Load provided scenario
+    2. Reset scenario
+2. Reset environment
+3. Initialize policy
+    1. OPTIONAL: Load saved models
+4. While play is active:
+    1. Pick actions based on policy, observations
+    2. Implement actions
+    3. Check to see if the play is over
+    4. Assign awards
+    5. Render the environment
+    6. Update the observations
     
 
 ## Scenarios

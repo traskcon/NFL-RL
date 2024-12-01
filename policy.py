@@ -20,7 +20,7 @@ class Policy():
             self.t_models[agent] = self.build_dqn(state)
 
     def choose_action(self, agent, observation=None, method="short-term"):
-        # Environment state is a tuple of n 1x2 np arrays containing each agent's position
+        # Environment state is a tuple of n+1 1x2 np arrays containing every agent's position and this one's target location
         if method == "dqn":
             model = self.q_models[agent.name]
             observation = np.array(observation)

@@ -20,6 +20,7 @@ class Scenario():
         # Can build formations as an argument here
         self.load_play(world)
         self.yardline = 30
+        world.yardline = 30
         self.active_endzone = np.array([[112,2],
                                         [122,55]]) #Hard-coded rn, fix in future to vary with environment
         # Define the pocket as a 6-yard wide box around QB's initial position
@@ -63,6 +64,9 @@ class Scenario():
         if agent.passing:
             # If QB is in passing mode, reward them for staying away from DL
             # May need to add reward to encourage QB to stay in the pocket
+            # TODO: (Performance Improvement) Since players positions in the list don't change during play,
+            # The defense and QB can be indexed once at the start of each play, instead of having to use list comprehension to find everytime
+            # Can also have a world.ballcarrier_index variable that contains the position of the current ballcarrier
             dl_players = [player for player in self.defensive_players(world) if player.position == "DL"]
             ol_rew = sum(np.sqrt(np.sum(np.square(a.location - agent.location)))
                         for a in dl_players)
@@ -150,25 +154,48 @@ class Scenario():
         qb = [player for player in world.agents if player.position == "QB"][0]
         dl_rew = -np.sqrt(np.sum(np.square(agent.location - qb.location)))
         return dl_rew
+    
+    def bc_reward(self, agent, world):
+        # Reward function for ballcarriers, incentivize running towards endzone, away from defense
+        forward_progress = agent.location[0] - self.yardline
+        def_loc = [player.location for player in self.defensive_players(world)]
+        evasion = np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in def_loc])
+        return forward_progress + evasion
+    
+    def pursuit_reward(self, agent, world):
+        # Reward function for defense chasing the ballcarrier
+        ballcarrier = [player for player in world.agents if player.ballcarrier][0]
+        pursuit = -1*np.sqrt(np.sum(np.square(agent.location - ballcarrier.location)))
+        return pursuit
 
     def reward(self, agent, world):
         #Position-specific reward given at each timestep during a play (reward-shaping)
-        reward_dict = {
-            "QB": self.qb_reward,
-            "RB": self.rb_reward,
-            "TE": self.te_reward,
-            "OL": self.ol_reward,
-            "WR": self.wr_reward,
-            "DB": self.db_reward,
-            "LB": self.lb_reward,
-            "DL": self.dl_reward,
-        }
-        reward_func = reward_dict[agent.position]
-        return reward_func(agent, world)
+        ballcarrier = [player for player in world.agents if player.ballcarrier][0]
+        if (ballcarrier.location[0] > self.yardline) and (agent.defense or agent.ballcarrier):
+            # If ballcarrier is past the line of scrimmage, return special ballcarrier and defense rewards
+            if agent.defense:
+                return self.pursuit_reward(agent, world)
+            elif agent.ballcarrier:
+                return self.bc_reward(agent, world)
+        else:
+            # Otherwise return standard position rewards
+            reward_dict = {
+                "QB": self.qb_reward,
+                "RB": self.rb_reward,
+                "TE": self.te_reward,
+                "OL": self.ol_reward,
+                "WR": self.wr_reward,
+                "DB": self.db_reward,
+                "LB": self.lb_reward,
+                "DL": self.dl_reward,
+            }
+            reward_func = reward_dict[agent.position]
+            return reward_func(agent, world)
     
     def play_reward(self, agent, world):
         #Reward based on TD, turnover, EPA
         #Calculate EPA using ep_model.py
+        # HOLD FOR FUTURE PLAYCALLING AI
         pass
 
     def defensive_players(self, world):

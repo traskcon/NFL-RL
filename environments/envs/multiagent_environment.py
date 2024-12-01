@@ -75,16 +75,13 @@ class MultiEnvironment(ParallelEnv):
 
         observations = {a.name:(
             *[agent.location for agent in self.world.agents],
-            self.target_location,
+            a.target_location,
         ) for a in self.world.agents}
-
-        # Get dummy infos. Necessary for proper parallel_to_aec conversion
-        infos = {name: {} for name in self.agent_names}
 
         if self.render_mode == "human":
             self._render_frame()
 
-        return observations, infos
+        return observations
 
     def step(self, actions):
         '''Set action for all agents, update relevant states'''
@@ -133,11 +130,8 @@ class MultiEnvironment(ParallelEnv):
         # Get observations
         observations = {a.name: (
             *[agent.location for agent in self.world.agents],
-            self.target_location - a.location,
+            a.target_location - a.location,
         ) for a in self.world.agents}
-
-        # Get dummy infos
-        infos = {name: {} for name in self.agent_names}
 
         if any(self.terminations.values()) or all(truncations.values()):
             # If termination/truncation condition met, remove all agents
@@ -146,7 +140,7 @@ class MultiEnvironment(ParallelEnv):
         if self.render_mode == "human":
             self._render_frame()
         
-        return observations, self.rewards, self.terminations, truncations, infos
+        return observations, self.rewards, self.terminations, truncations
     
     def termination(self, agent):
         # First check for scenario-specific terminations
@@ -195,23 +189,32 @@ class MultiEnvironment(ParallelEnv):
                 (pix_square_size, pix_square_size),
             ),
         )
-        # Gridlines are very harsh on the eyes at this scale, but useful code example for future environment beautification
+        # Draw gridlines
         for x in range(self.length + 1):
             pygame.draw.line(
                 canvas,
                 (0,0,0, 0.2),
                 (0, pix_square_size * x),
                 (self.window_width, pix_square_size * x),
-                width=2,
+                width=1,
             )
         for y in range(self.width + 1):
-            pygame.draw.line(
-                canvas,
-                (0,0,0, 0.2),
-                (pix_square_size * y, 0),
-                (pix_square_size * y, self.window_length),
-                width=2,
-            )
+            if y == self.world.yardline:
+                pygame.draw.line(
+                    canvas,
+                    (0,0,255, 1),
+                    (pix_square_size * y, 0),
+                    (pix_square_size * y, self.window_length),
+                    width=1,
+                )
+            else:
+                pygame.draw.line(
+                    canvas,
+                    (0,0,0, 0.2),
+                    (pix_square_size * y, 0),
+                    (pix_square_size * y, self.window_length),
+                    width=1,
+                )
         # Draw sidelines
         pygame.draw.rect(
             canvas,
