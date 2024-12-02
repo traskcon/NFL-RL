@@ -59,7 +59,7 @@ class Scenario():
             else self.agent_reward(agent, world)
         )
     
-    def termination(self, agent):
+    def termination(self, agent, world):
         if not agent.defense:
             if np.sum(np.square(agent.location - agent.target_location)) == 0:
                 return True #End simulation if WR reaches target

@@ -91,14 +91,17 @@ class MultiEnvironment(ParallelEnv):
             player_locations = np.array([agent.location for agent in self.world.agents])
             collisions = np.all((agent.location + agent_direction) == player_locations, axis=1)
             #TODO: Repackage collision checking into its own function
+            # Also need to investigate whether or not 
             if np.any(collisions):
                 i = np.flatnonzero(collisions)[0]
                 opp_agent = self.world.agents[i]
                 strength_diff = agent.strength - opp_agent.strength
                 #Sampling from normal distribution
                 if strength_diff >= np.random.randn()*10:
+                    # Print option for debugging
+                    # print("{} pushed {} backwards".format(agent.name, opp_agent.name))
                     # Push opponent backwards
-                    opp_agent.location = opp_agent.location - agent_direction
+                    opp_agent.location = opp_agent.location + agent_direction
                     # Use np.clip to ensure we don't leave the grid
                     agent.location = np.clip(
                         agent.location + agent_direction, [0, 0], [self.width - 1, self.length - 1]
@@ -142,7 +145,7 @@ class MultiEnvironment(ParallelEnv):
     
     def termination(self, agent):
         # First check for scenario-specific terminations
-        if self.scenario.termination(agent):
+        if self.scenario.termination(agent, self.world):
             return True
         else:
             # Check if an offensive player has stepped out of bounds

@@ -1,23 +1,23 @@
-position,name,team,strength
-QB,Jared Goff,Lions,64
-RB,David Montgomery,Lions,77
-WR,Amon-Ra St Brown,Lions,67
-WR,Jameson Williams,Lions,63
-WR,Tim Patrick,Lions,69
-TE,Sam LaPorta,Lions,74
-OL,Taylor Decker,Lions,90
-OL,Graham Glasgow,Lions,87
-OL,Frank Ragnow,Lions,92
-OL,Kevin Zeitler,Lions,91
-OL,Penei Sewell,Lions,97
-DL,Clelin Ferrell,Commanders,83
-DL,Daron Payne,Commanders,95
-DL,Jer'Zhan Newton,Commanders,85
-DL,Dorance Armstrong,Commanders,82
-LB,Frankie Luvu,Commanders,83
-LB,Bobby Wagner,Commanders,78
-LB,Dante Fowler Jr,Commanders,73
-DB,Benjamin St-Juste,Commanders,60
-DB,Jeremy Chinn,Commanders,70
-DB,Quan Martin,Commanders,61
-DB,Mike Sainristil,Commanders,51
+position,name,team,strength,tackle,break_tackle
+QB,Jared Goff,Lions,64,27,51
+RB,David Montgomery,Lions,77,30,89
+WR,Amon-Ra St Brown,Lions,67,34,78
+WR,Jameson Williams,Lions,63,26,75
+WR,Tim Patrick,Lions,69,35,69
+TE,Sam LaPorta,Lions,74,59,72
+OL,Taylor Decker,Lions,90,34,6
+OL,Graham Glasgow,Lions,87,29,8
+OL,Frank Ragnow,Lions,92,29,16
+OL,Kevin Zeitler,Lions,91,25,6
+OL,Penei Sewell,Lions,97,32,15
+DL,Clelin Ferrell,Commanders,83,82,13
+DL,Daron Payne,Commanders,95,81,32
+DL,Jer'Zhan Newton,Commanders,85,82,21
+DL,Dorance Armstrong,Commanders,82,82,15
+LB,Frankie Luvu,Commanders,83,81,25
+LB,Bobby Wagner,Commanders,78,98,23
+LB,Dante Fowler Jr,Commanders,73,78,35
+DB,Benjamin St-Juste,Commanders,60,65,45
+DB,Jeremy Chinn,Commanders,70,77,43
+DB,Quan Martin,Commanders,61,55,71
+DB,Mike Sainristil,Commanders,51,55,71
