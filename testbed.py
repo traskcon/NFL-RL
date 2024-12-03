@@ -1,17 +1,18 @@
 # Load environment
 from environments.envs import multiagent_environment
+from environments import db_battle, all_22
 import numpy as np
 import policy
 from collections import deque
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-scenario = multiagent_environment.Scenario()
-env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 100, render_mode=None)
+scenario = all_22.Scenario()
+env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles = 100, render_mode=None, roster="FullTeam-Roster.csv")
 observations = env.reset()
 learner = policy.Policy(env, observations)
 
-train_episodes = 1000
+train_episodes = 300
 epsilon = 1 #Epsilon-greedy algorithm, every step is random initially
 max_epsilon = 1
 min_epsilon = 0.01
@@ -51,29 +52,22 @@ for episode in tqdm(range(train_episodes)):
             world_steps = 0
         env.render()
         observations = new_observations
-    if any(terminations.values()):
-        consecutive_terminations += 1
-        if consecutive_terminations >= 5:
-            # Stop the training early if WR successfully hits the target 5 times in a row
-            break
-    else:
-        consecutive_terminations = 0
     epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay * episode)
     # Visualize the final trained agents
     if episode == (train_episodes - 2):
         env.render_mode = "human"
 env.close()
-learner.save_models("-MK3_MR")
+learner.save_models("-A22-MK1")
 
 #Visualize cumulative rewards
 i = 1
 for agent, rewards in cumulative_rewards.items():
-    plt.subplot(2,2,i)
+    plt.subplot(5,5,i)
     plt.gca().set_title(agent + " Reward")
     plt.plot(range(len(rewards)), rewards)
     i += 1
 for agent, loss in q_loss.items():
-    plt.subplot(2,2,i)
+    plt.subplot(5,5,i)
     plt.gca().set_title(agent + " Loss")
     plt.plot(range(len(loss)), loss)
     i += 1
