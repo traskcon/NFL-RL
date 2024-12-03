@@ -66,6 +66,9 @@ for agent, rewards in cumulative_rewards.items():
     plt.gca().set_title(agent + " Reward")
     plt.plot(range(len(rewards)), rewards)
     i += 1
+plt.show()
+i=1
+plt.figure(2)
 for agent, loss in q_loss.items():
     plt.subplot(5,5,i)
     plt.gca().set_title(agent + " Loss")

@@ -8,7 +8,7 @@ scenario = all_22.Scenario()
 env = multiagent_environment.MultiEnvironment(scenario=scenario, max_cycles=100, render_mode="human", roster="FullTeam-Roster.csv")
 observations = env.reset()
 learner = policy.Policy(env, observations)
-#learner.load_models("-MK3_MR")
+learner.load_models("-A22-MK1")
 
 epsilon = 0.01
 
@@ -16,7 +16,7 @@ while env.world.agents:
     if np.random.random() <= epsilon:
         actions = {agent.name: env.action_space(agent).sample() for agent in env.world.agents}
     else:
-        actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="heuristic")
+        actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn")
                for agent in env.world.agents}
     new_observations, rewards, terminations, truncations = env.step(actions)
     env.render()
