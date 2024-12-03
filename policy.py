@@ -6,6 +6,7 @@ import numpy as np
 import random
 import keras
 import copy
+import tensorflow as tf
 
 class Policy():
     def __init__(self, env, observations):
@@ -25,10 +26,11 @@ class Policy():
             model = self.q_models[agent.name]
             observation = np.array(observation)
             observation_reshaped = np.reshape(observation, [1, *observation.shape])
-            predicted = model.predict(observation_reshaped, verbose=0).flatten()
+            # Calling model directly instead of calling .predict reducing retracing and dramatically speeds up execution time (~10x)
+            predicted = np.array(model(observation_reshaped, training=False))
             # Show predicted Q-values for debugging
             # print(predicted)
-            return np.argmax(predicted) # Return action with predicted highest Q-value
+            return np.argmax(predicted.flatten()) # Return action with predicted highest Q-value
         else:
             # Heuristic algorithm: Take action with largest immediate reward
             rewards = dict()
@@ -67,9 +69,9 @@ class Policy():
         batch_size = 128
         mini_batch = random.sample(replay_memory, batch_size)
         current_states = np.array([info[0][agent] for info in mini_batch])
-        predicted_qs_list = q_model.predict(current_states, verbose=0)
+        predicted_qs_list = np.array(q_model(current_states, training=False))
         next_states = np.array([info[3][agent] for info in mini_batch])
-        future_qs = t_model.predict(next_states, verbose=0)
+        future_qs = np.array(t_model(next_states, training=False))
 
         X = []
         Y = []
@@ -85,6 +87,8 @@ class Policy():
 
             X.append(observation[agent])
             Y.append(predicted_qs)
+        # This triggers retracing, determine how to limit
+        # May be acceptable inefficiency, seems to only retrace once initially, 300 iterations of 22 DQNs only takes ~20min
         self.history[agent] = q_model.fit(np.array(X), np.array(Y), batch_size=batch_size, verbose=0, shuffle=True)
 
     def copy_weights(self):
