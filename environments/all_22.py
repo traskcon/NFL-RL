@@ -38,12 +38,11 @@ class Scenario():
         return [index for index, player in enumerate(world.agents) if player.position in position]
         
     def update_agent_states(self, world):
-        for player in world.agents:
-            if player.position == "QB":
-                # If QB is in the pocket, set their status as passing
-                player.passing = self.check_in_box(self.pocket, player.location)
-                # Need to determine how QB decides who to pass to
-            # Add catching, handoff, and fumble functions here to change ballcarrier
+        qb = world.agents[self.qb_index]
+        # If QB is in the pocket, set their status as passing
+        qb.passing = self.check_in_box(self.pocket, qb.location)
+        # Need to determine how QB decides who to pass to
+        # Add catching, handoff, and fumble functions here to change ballcarrier
 
     def termination(self, agent, world): 
         if agent.ballcarrier:

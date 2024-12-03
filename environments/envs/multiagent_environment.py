@@ -275,6 +275,13 @@ class MultiEnvironment(ParallelEnv):
                 (agent.location + 0.5) * pix_square_size,
                 pix_square_size / 3,
             )
+            if agent.ballcarrier:
+                pygame.draw.circle(
+                    canvas,
+                    (255,255,0),
+                    (agent.location + 0.5) * pix_square_size,
+                    pix_square_size/2, width=1
+                )
 
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
