@@ -44,7 +44,7 @@ class Scenario():
         # Need to determine how QB decides who to pass to
         # Add catching, handoff, and fumble functions here to change ballcarrier
 
-    def termination(self, agent, world): 
+    def termination(self, agent, world, verbose=False): 
         if agent.ballcarrier:
             if self.check_in_box(self.active_endzone, agent.location):
                 return True #End if touchdown is scored
@@ -56,7 +56,7 @@ class Scenario():
                     tackle_diff = tackler.tackle - agent.break_tackle
                     if tackle_diff >= np.random.randn()*10:
                         #Sampling from normal distribution, potentially readjust based on sim results
-                        print("{} tackled {} at the {} yardline".format(tackler.name, agent.name, agent.location[0]))
+                        if verbose: print("{} tackled {} at the {} yardline".format(tackler.name, agent.name, agent.location[0]))
                         return True
         else:
             return False
