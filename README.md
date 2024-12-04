@@ -1,6 +1,7 @@
 # NFL-RL
 Training agents to play American Football via Reinforcement Learning
-Please report any bugs via this repository's "Issues" section
+
+_Please report any bugs via this repository's "Issues" section_
 
 ## Installation Instructions
 
