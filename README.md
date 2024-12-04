@@ -6,17 +6,17 @@ _Please report any bugs via this repository's "Issues" section_
 ## Installation Instructions
 
 All relevant code files can be found at this project's GitHub Repository: https://github.com/traskcon/NFL-RL
-Development notes and descriptions scenarios, code flows, and code structure can be found in DOCS.md
+Development notes and descriptions of scenarios, code flows, and code structure can be found in DOCS.md
 
 ### Initial Setup
 1. Download code files: ``git clone https://github.com/traskcon/NFL-RL``
 2. Navigate inside the NFL-RL directory and install all necessary packages:
-    ``cd NFL-RL``
-    ``pip install -r requirements.txt``
+   ``cd NFL-RL``
+   ``pip install -r requirements.txt``
 
 ### Run DB Battle Scenario
 1. To run the DB Battle Scenario using the trained agents, run ``python demonstration.py --scenario="db-battle" --method="DQN"``
-    NOTE: The arguments are case-sensitive, therefore copy-pasting the above line into the command line is preferred
+   NOTE: The arguments are case-sensitive, therefore copy-pasting the above line into the command line is preferred
 2. Alternatively, one can run the DB Battle Scenario with the agents taking the action with the greatest immediate reward using ``python demonstration.py --scenario="db-battle" --method="heuristic"``. This is useful for demonstrating the ability of the DQNs to learn long-term behavior
 
 **Expected Result:** A pygame window will open, showing the WR (blue) running towards their target location (white square), while being closely shadowed by the DB (red). The simulation will end once the WR reaches the target location. Notably, the target location present used in this demonstration was not present in the training set for these agents. 
