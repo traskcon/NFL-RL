@@ -11,8 +11,8 @@ Development notes and descriptions of scenarios, code flows, and code structure 
 ### Initial Setup
 1. Download code files: ``git clone https://github.com/traskcon/NFL-RL``
 2. Navigate inside the NFL-RL directory and install all necessary packages:
-   ``cd NFL-RL``
-   ``pip install -r requirements.txt``
+    ``cd NFL-RL``
+    ``pip install -r requirements.txt``
 
 ### Run DB Battle Scenario
 1. To run the DB Battle Scenario using the trained agents, run ``python demonstration.py --scenario="db-battle" --method="DQN"``
