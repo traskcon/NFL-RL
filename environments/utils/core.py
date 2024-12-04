@@ -18,4 +18,5 @@ class World():
     def __init__(self):
         self.agents = []
         self.landmarks = []
+        self.yardline = None
         #Future parameters added as needed to support continuous movement
