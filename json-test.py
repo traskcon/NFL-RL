@@ -42,10 +42,11 @@ rel_formation = {"formation_name":"trey right shotgun",
                 }}
 
 json_file = "sample_play.json"
+
+# Write dictionary to JSON file
 with open(json_file, "w") as f:
     json.dump(sample_play, f, ensure_ascii=False, indent=4)
 
+# Read data from JSON to dictionary
 with open(json_file) as json_data:
     data = json.load(json_data)
-
-print(data["play_name"])
