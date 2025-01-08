@@ -1,6 +1,8 @@
 import numpy as np
 from environments.utils.core import Agent, World
 import pandas as pd
+import sys
+import json
 
 class Scenario():
     def make_world(self, N=22, roster="Roster.csv"):
@@ -227,8 +229,19 @@ class Scenario():
         #routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
         #landmark.location = routes["slant/in"]
         # TODO: Add flag indicating whether a player is eligible or not, use that for coverage rewards
-        play = pd.read_csv(file)
-        for i, agent in enumerate(world.agents):
-            row = play.index[play["position"] == agent.index].to_list()[0]
-            agent.location = np.array([play.at[row,"x"],play.at[row,"y"]])
-            agent.target_location = np.array([play.at[row,"goal_x"], play.at[row,"goal_y"]])
+        filetype = file.split(".")[-1].lower()
+        if filetype == "csv":
+            play = pd.read_csv(file)
+            for i, agent in enumerate(world.agents):
+                row = play.index[play["position"] == agent.index].to_list()[0]
+                agent.location = np.array([play.at[row,"x"],play.at[row,"y"]])
+                agent.target_location = np.array([play.at[row,"goal_x"], play.at[row,"goal_y"]])
+        elif filetype == "json":
+            # TEMP PLACEHOLDER: Update with correct parser using relative formation locations
+            with open(file) as json_data:
+                play = json.load(json_data)
+                for agent in world.agents:
+                    agent.location = np.array(play["target_locations"][agent.index])
+                    agent.target_location = np.array(play["target_locations"][agent.index])
+        else:
+            sys.exit("Attempted to load invalid play filetype")
