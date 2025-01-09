@@ -41,11 +41,14 @@ rel_formation = {"formation_name":"trey right shotgun",
                     "TE_1": [-2,25]
                 }}
 
-json_file = "sample_play.json"
+json_file = "sample_playbook.json"
+
+sample_playbook = {"sample_play":sample_play,
+                   "trey right shotgun":rel_formation}
 
 # Write dictionary to JSON file
 with open(json_file, "w") as f:
-    json.dump(sample_play, f, ensure_ascii=False, indent=4)
+    json.dump(sample_playbook, f, ensure_ascii=False, indent=4)
 
 # Read data from JSON to dictionary
 with open(json_file) as json_data:

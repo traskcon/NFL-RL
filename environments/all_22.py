@@ -13,6 +13,7 @@ class Scenario():
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
         self.load_roster(world, roster)
+        self.load_playbook(world)
         return world
     
     def reset_world(self, world):
@@ -20,9 +21,9 @@ class Scenario():
         # One to reset to start of the play, one for start of the drive, and one for start of game
         world.timestep = 0
         # Can build formations as an argument here
-        self.load_play(world)
         self.yardline = 30
         world.yardline = 30
+        self.load_play(world)
         self.active_endzone = np.array([[112,2],
                                         [122,55]]) #Hard-coded rn, fix in future to vary with environment
         # Define the pocket as a 6-yard wide box around QB's initial position
@@ -224,6 +225,12 @@ class Scenario():
             position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
             agent.index = f"{agent.position}_{position_counts[agent.position]}"
 
+    def load_playbook(self, world, file="sample_playbook.json"):
+        #Each team has a JSON file containing all of their plays and formations
+        #These plays can then be sampled from and loaded in for each down
+        with open(file) as json_data:
+            self.playbook = json.load(json_data)
+
     def load_play(self, world, file="Test-Playbook.csv"):
         # CSV file containing player starting locations for different plays
         #routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
@@ -241,7 +248,8 @@ class Scenario():
             with open(file) as json_data:
                 play = json.load(json_data)
                 for agent in world.agents:
-                    agent.location = np.array(play["target_locations"][agent.index])
+                    agent.location = np.array(play["formation"][agent.index])
+                    agent.location[0] += self.yardline
                     agent.target_location = np.array(play["target_locations"][agent.index])
         else:
             sys.exit("Attempted to load invalid play filetype")
