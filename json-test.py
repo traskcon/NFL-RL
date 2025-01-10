@@ -41,15 +41,37 @@ rel_formation = {"formation_name":"trey right shotgun",
                     "TE_1": [-2,25]
                 }}
 
-json_file = "sample_playbook.json"
+cover_1 = {"play_name":"Cover 1",
+           "personnel":"Base 4-3",
+           "locations": {
+               "DL_1": [1,33],
+               "DL_2": [1,31],
+               "DL_3": [1,27],
+               "DL_4": [1,24],
+               "LB_1": [5,34],
+               "LB_2": [5,29],
+               "LB_3": [5,25],
+               "DB_1": [4,38],
+               "DB_2": [13,21],
+               "DB_3": [3,17],
+               "DB_4": [6,8]
+           }}
 
-sample_playbook = {"sample_play":sample_play,
+off_file = "sample_playbook_off.json"
+def_file = "sample_playbook_def.json"
+
+sample_playbook_off = {"sample_play":sample_play,
                    "trey right shotgun":rel_formation}
 
-# Write dictionary to JSON file
-with open(json_file, "w") as f:
-    json.dump(sample_playbook, f, ensure_ascii=False, indent=4)
+sample_playbook_def = {"test_play":cover_1}
 
-# Read data from JSON to dictionary
+# Write dictionary to JSON file
+with open(off_file, "w") as f:
+    json.dump(sample_playbook_off, f, ensure_ascii=False, indent=4)
+
+with open(def_file, "w") as f:
+    json.dump(sample_playbook_def, f, ensure_ascii=False, indent=4)
+
+'''# Read data from JSON to dictionary
 with open(json_file) as json_data:
-    data = json.load(json_data)
+    data = json.load(json_data)'''
