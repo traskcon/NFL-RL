@@ -1,5 +1,5 @@
 import numpy as np
-from environments.utils.core import Agent, World
+from environments.utils.core import Agent, World, Team
 import pandas as pd
 import sys
 import json

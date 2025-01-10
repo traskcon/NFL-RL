@@ -20,3 +20,10 @@ class World():
         self.landmarks = []
         self.yardline = None
         #Future parameters added as needed to support continuous movement
+
+
+class Team():
+    def __init__(self):
+        self.name = ""
+        self.score = 0
+        self.playbook = dict()
