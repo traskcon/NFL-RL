@@ -47,6 +47,18 @@ class Scenario():
         # Need to determine how QB decides who to pass to
         # Add catching, handoff, and fumble functions here to change ballcarrier
 
+    def handoff(self, world):
+        # Pseudocode for handoffs
+        pass
+
+    def passing(self,world):
+        # Pseudocode for passing
+        pass
+
+    def fumble(self, world):
+        # Pseudocode for fumbles
+        pass
+
     def termination(self, agent, world, verbose=False): 
         if agent.ballcarrier:
             if self.check_in_box(self.active_endzone, agent.location):
