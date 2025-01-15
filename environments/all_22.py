@@ -24,8 +24,7 @@ class Scenario():
         self.yardline = 30
         world.yardline = 30
         self.load_play(world)
-        self.active_endzone = np.array([[112,2],
-                                        [122,55]]) #Hard-coded rn, fix in future to vary with environment
+        self.active_endzone = np.array([[112,2],[122,55]]) 
         # Define the pocket as a 6-yard wide box around QB's initial position
         # Index the QB, DL once at game start instead of everytime reward function is run
         self.qb_index = self.get_player_indices(world, ["QB"])[0]
@@ -49,10 +48,15 @@ class Scenario():
 
     def handoff(self, world):
         # Pseudocode for handoffs
+        # Can basically just teleport the ball for pitches
+        # True handoffs will occur when RB is next to QB
         pass
 
     def passing(self,world):
         # Pseudocode for passing
+        # Select target
+        # Use QB accuracy to determine where ball goes
+        # Build receiving in here or as its own function?
         pass
 
     def fumble(self, world):

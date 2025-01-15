@@ -90,8 +90,7 @@ class MultiEnvironment(ParallelEnv):
             agent_direction = self._action_to_direction[agent_action] #Map the action (0,1,2,3) to the direction of movement
             player_locations = np.array([agent.location for agent in self.world.agents])
             collisions = np.all((agent.location + agent_direction) == player_locations, axis=1)
-            #TODO: Repackage collision checking into its own function
-            # Also need to investigate whether or not 
+            #Check collisions
             if np.any(collisions):
                 i = np.flatnonzero(collisions)[0]
                 opp_agent = self.world.agents[i]
