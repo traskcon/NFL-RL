@@ -1,8 +1,12 @@
-import pandas as pd
+'''
+Multiagent Environment:
+* Purpose: Standardized environment for action loop
+    * Action Loop: (Observe environment -> Take action -> Implement actions/update environment -> End Step, repeat)
+        * End Step: Calculate/assign rewards, check for terminations
+'''
 import numpy as np
 from gymnasium import spaces
 import pygame
-from environments.utils.core import Agent, World
 from pettingzoo import ParallelEnv
 
 class MultiEnvironment(ParallelEnv):

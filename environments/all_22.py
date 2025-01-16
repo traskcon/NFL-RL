@@ -16,6 +16,9 @@ class Scenario():
         self.load_playbook(world)
         return world
     
+    def new_play(self, world):
+        world.playclock = 0
+    
     def reset_world(self, world):
         # Will need multiple reset functions
         # One to reset to start of the play, one for start of the drive, and one for start of game
@@ -45,12 +48,13 @@ class Scenario():
         qb.passing = self.check_in_box(self.pocket, qb.location)
         # Need to determine how QB decides who to pass to
         # Add catching, handoff, and fumble functions here to change ballcarrier
-
-    def handoff(self, world):
-        # Pseudocode for handoffs
-        # Can basically just teleport the ball for pitches
-        # True handoffs will occur when RB is next to QB
-        pass
+        # Check handoff
+        if (world.play_type == "run") and qb.ballcarrier:
+            # Currently just teleporting the ball from QB to RB
+            # Can update with more detail if necessary
+            rb = self.get_player_indices(world, ["RB"])[0]
+            rb.ballcarrier = True
+            qb.ballcarrier = False
 
     def passing(self,world):
         # Pseudocode for passing
