@@ -139,6 +139,7 @@ class MultiEnvironment(ParallelEnv):
 
         if any(self.terminations.values()) or all(truncations.values()):
             # If termination/truncation condition met, remove all agents
+            self.scenario.update_downs(self.world)
             self.world.agents = []
         
         if self.render_mode == "human":

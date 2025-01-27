@@ -10,24 +10,38 @@ class Scenario():
         num_agents = N
         world.num_agents = num_agents
         world.timestep = None
+        world.new_drive = True
         # Add agents
         world.agents = [Agent() for _ in range(num_agents)]
         self.load_roster(world, roster)
         self.load_playbook(world)
         return world
-    
-    def new_play(self, world):
-        world.playclock = 0
+
+    def reset_drive(self, world):
+        world.yardline = 30
+        world.first_down = 40
+        world.down = 1
+        self.active_endzone = np.array([[112,2],[122,55]]) 
+
+    def update_downs(self, world):
+        for agent in world.agents:
+            if agent.ballcarrier:
+                world.yardline = agent.location[0]
+        if world.yardline >= world.first_down:
+            world.down = 1
+            world.first_down = world.yardline + 10
+        else:
+            world.down += 1
     
     def reset_world(self, world):
-        # Will need multiple reset functions
-        # One to reset to start of the play, one for start of the drive, and one for start of game
+        # Called by environment at the start of each play
+        # Has subfunctions that get called based on whether its a new drive
         world.timestep = 0
         # Can build formations as an argument here
-        self.yardline = 30
-        world.yardline = 30
+        if world.new_drive:
+            self.reset_drive(world)
+
         self.load_play(world)
-        self.active_endzone = np.array([[112,2],[122,55]]) 
         # Define the pocket as a 6-yard wide box around QB's initial position
         # Index the QB, DL once at game start instead of everytime reward function is run
         self.qb_index = self.get_player_indices(world, ["QB"])[0]
@@ -100,7 +114,7 @@ class Scenario():
             return ol_rew
         else:
             # Otherwise reward them for getting downfield, avoiding nearest defender
-            downfield_rew = agent.location[0] - self.yardline
+            downfield_rew = agent.location[0] - world.yardline
             defense = [player.location for player in self.defensive_players(world)]
             evasion_rew = np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in defense])
             return downfield_rew + 0.1 * evasion_rew
@@ -184,7 +198,7 @@ class Scenario():
     
     def bc_reward(self, agent, world):
         # Reward function for ballcarriers, incentivize running towards endzone, away from defense
-        forward_progress = agent.location[0] - self.yardline
+        forward_progress = agent.location[0] - world.yardline
         def_loc = [player.location for player in self.defensive_players(world)]
         evasion = np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in def_loc])
         return forward_progress + evasion
@@ -198,7 +212,7 @@ class Scenario():
     def reward(self, agent, world):
         #Position-specific reward given at each timestep during a play (reward-shaping)
         ballcarrier = [player for player in world.agents if player.ballcarrier][0]
-        if (ballcarrier.location[0] > self.yardline) and (agent.defense or agent.ballcarrier):
+        if (ballcarrier.location[0] > world.yardline) and (agent.defense or agent.ballcarrier):
             # If ballcarrier is past the line of scrimmage, return special ballcarrier and defense rewards
             if agent.defense:
                 return self.pursuit_reward(agent, world)
@@ -269,7 +283,7 @@ class Scenario():
                 play = json.load(json_data)
                 for agent in world.agents:
                     agent.location = np.array(play["formation"][agent.index])
-                    agent.location[0] += self.yardline
+                    agent.location[0] += world.yardline
                     agent.target_location = np.array(play["target_locations"][agent.index])
         else:
             sys.exit("Attempted to load invalid play filetype")
