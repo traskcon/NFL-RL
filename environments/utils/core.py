@@ -26,5 +26,6 @@ class Team():
     def __init__(self, name):
         self.name = name
         self.score = 0
-        self.playbook = dict()
+        self.off_playbook = dict()
+        self.def_playbook = dict()
         self.defense = False

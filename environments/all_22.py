@@ -15,7 +15,7 @@ class Scenario():
         self.teams = [Team("Lions"), Team("Commanders")]
         self.teams[0].defense = True
         self.load_roster(world, roster)
-        self.load_playbook(world)
+        self.load_playbook()
         return world
 
     def reset_drive(self, world):
@@ -263,31 +263,27 @@ class Scenario():
             position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
             agent.index = f"{agent.position}_{position_counts[agent.position]}"
 
-    def load_playbook(self, world, file="sample_playbook.json"):
+    def load_playbook(self):
         #Each team has a JSON file containing all of their plays and formations
-        #These plays can then be sampled from and loaded in for each down
-        with open(file) as json_data:
-            self.playbook = json.load(json_data)
+        #These plays are loaded in at the start of a game, then randomly sampled in load_play
+        for team in self.teams:
+            # Placeholder code, update with both teams playbook in future
+            with open("sample_playbook_off.json") as json_data:
+                team.off_playbook = json.load(json_data)
+            with open("sample_playbook_def.json") as json_data:
+                team.def_playbook = json.load(json_data)
 
-    def load_play(self, world, file="Test-Playbook.csv"):
-        # CSV file containing player starting locations for different plays
-        #routes = {"slant/in":np.array([30,20]), "go":np.array([50,10])}
-        #landmark.location = routes["slant/in"]
+    def load_play(self, world):
         # TODO: Add flag indicating whether a player is eligible or not, use that for coverage rewards
-        filetype = file.split(".")[-1].lower()
-        if filetype == "csv":
-            play = pd.read_csv(file)
-            for i, agent in enumerate(world.agents):
-                row = play.index[play["position"] == agent.index].to_list()[0]
-                agent.location = np.array([play.at[row,"x"],play.at[row,"y"]])
-                agent.target_location = np.array([play.at[row,"goal_x"], play.at[row,"goal_y"]])
-        elif filetype == "json":
-            # TEMP PLACEHOLDER: Update with correct parser using relative formation locations
-            with open(file) as json_data:
-                play = json.load(json_data)
-                for agent in world.agents:
+        # Add code to randomly sample plays instead of always picking sample_play
+        for team in self.teams:
+            if team.defense:
+                play = team.def_playbook["sample_play"]
+            else:
+                play = team.off_playbook["sample_play"]
+            for agent in world.agents:
+                if agent.team == team.name:
+                    print(play["formation"])
                     agent.location = np.array(play["formation"][agent.index])
                     agent.location[0] += world.yardline
                     agent.target_location = np.array(play["target_locations"][agent.index])
-        else:
-            sys.exit("Attempted to load invalid play filetype")
