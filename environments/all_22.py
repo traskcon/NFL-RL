@@ -7,12 +7,13 @@ import json
 class Scenario():
     def make_world(self, N=22, roster="Roster.csv"):
         world = World()
-        num_agents = N
-        world.num_agents = num_agents
+        world.num_agents = N
         world.timestep = None
         world.new_drive = True
         # Add agents
-        world.agents = [Agent() for _ in range(num_agents)]
+        world.agents = [Agent() for _ in range(N)]
+        self.teams = [Team("Lions"), Team("Commanders")]
+        self.teams[0].defense = True
         self.load_roster(world, roster)
         self.load_playbook(world)
         return world
@@ -21,7 +22,8 @@ class Scenario():
         world.yardline = 30
         world.first_down = 40
         world.down = 1
-        self.active_endzone = np.array([[112,2],[122,55]]) 
+        self.active_endzone = np.array([[112,2],[122,55]])
+        self.teams[1].defense, self.teams[0].defense = self.teams[0].defense, self.teams[1].defense
 
     def update_downs(self, world):
         for agent in world.agents:
@@ -32,6 +34,7 @@ class Scenario():
             world.first_down = world.yardline + 10
         else:
             world.down += 1
+        print("Down: {}, To go: {}".format(world.down, world.first_down - world.yardline))
     
     def reset_world(self, world):
         # Called by environment at the start of each play
@@ -51,6 +54,7 @@ class Scenario():
         self.pocket = np.array([qb.location-3, qb.location+3])
         qb.ballcarrier = True #Define QB as ballcarrier at start of the play
         self.update_agent_states(world)
+        self.new_drive = False
 
     def get_player_indices(self, world, position):
         # Return a list of player indices from world.agents based on player position
