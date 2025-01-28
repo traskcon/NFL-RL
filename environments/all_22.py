@@ -5,18 +5,21 @@ import sys
 import json
 
 class Scenario():
-    def make_world(self, N=22, roster="Roster.csv"):
+    def __init__(self):
         world = World()
-        world.num_agents = N
+        world.num_agents = 22
         world.timestep = None
         world.new_drive = True
-        # Add agents
-        world.agents = [Agent() for _ in range(N)]
+        self.world = world
         self.teams = [Team("Lions"), Team("Commanders")]
         self.teams[0].defense = True
-        self.load_roster(world, roster)
         self.load_playbook()
-        return world
+    
+    def make_world(self, N=22, roster="Roster.csv"):
+        # Add agents
+        self.world.agents = [Agent() for _ in range(N)]
+        self.load_roster(self.world, roster)
+        return self.world
 
     def reset_drive(self, world):
         world.yardline = 30
@@ -54,7 +57,7 @@ class Scenario():
         self.pocket = np.array([qb.location-3, qb.location+3])
         qb.ballcarrier = True #Define QB as ballcarrier at start of the play
         self.update_agent_states(world)
-        self.new_drive = False
+        world.new_drive = False
 
     def get_player_indices(self, world, position):
         # Return a list of player indices from world.agents based on player position
@@ -70,7 +73,7 @@ class Scenario():
         if (world.play_type == "run") and qb.ballcarrier:
             # Currently just teleporting the ball from QB to RB
             # Can update with more detail if necessary
-            rb = self.get_player_indices(world, ["RB"])[0]
+            rb = world.agents[self.get_player_indices(world, ["RB"])[0]]
             rb.ballcarrier = True
             qb.ballcarrier = False
 
@@ -281,9 +284,10 @@ class Scenario():
                 play = team.def_playbook["sample_play"]
             else:
                 play = team.off_playbook["sample_play"]
+                world.play_type = play["play_type"]
             for agent in world.agents:
                 if agent.team == team.name:
-                    print(play["formation"])
                     agent.location = np.array(play["formation"][agent.index])
                     agent.location[0] += world.yardline
                     agent.target_location = np.array(play["target_locations"][agent.index])
+                    agent.target_location[0] += world.yardline

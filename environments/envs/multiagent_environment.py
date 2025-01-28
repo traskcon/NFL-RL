@@ -212,6 +212,14 @@ class MultiEnvironment(ParallelEnv):
                     (pix_square_size * y, self.window_length),
                     width=1,
                 )
+            elif y == self.world.first_down:
+                pygame.draw.line(
+                    canvas,
+                    (255,255,0, 1),
+                    (pix_square_size * y, 0),
+                    (pix_square_size * y, self.window_length),
+                    width=1,
+                )
             else:
                 pygame.draw.line(
                     canvas,
