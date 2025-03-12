@@ -208,7 +208,7 @@ class Scenario():
         forward_progress = agent.location[0] - world.yardline
         def_loc = [player.location for player in self.defensive_players(world)]
         evasion = np.min([np.sqrt(np.sum(np.square(agent.location - loc))) for loc in def_loc])
-        return forward_progress + evasion
+        return forward_progress + 0.5*evasion
     
     def pursuit_reward(self, agent, world):
         # Reward function for defense chasing the ballcarrier

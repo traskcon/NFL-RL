@@ -12,7 +12,7 @@ learner.load_models("-A22-MK1")
 while env.world.down < 5:
     observations = env.reset()
     while env.world.agents:
-        actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="dqn")
+        actions = {agent.name: learner.choose_action(agent, observations[agent.name], method="heuristic")
             for agent in env.world.agents}
         new_observations, rewards, terminations, truncations = env.step(actions)
         env.render()
