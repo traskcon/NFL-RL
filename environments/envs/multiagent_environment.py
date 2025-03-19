@@ -304,11 +304,24 @@ class MultiEnvironment(ParallelEnv):
             # We need to ensure that human-rendering occurs at the predefined framerate.
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
+            # Add in pause functionality (pressing p)
+            for event in pygame.event.get(eventtype=pygame.KEYDOWN):
+                if event.key == pygame.K_p:
+                    self.pause()
+
         else:  # rgb_array
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
             )
         
+    def pause(self):
+        paused = True
+        while paused:
+            for event in pygame.event.get(eventtype=pygame.KEYDOWN):
+                if event.key == pygame.K_r:
+                    paused = False
+            self.clock.tick(15)
+
     def close(self):
         if self.window is not None:
             pygame.display.quit()
