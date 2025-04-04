@@ -66,7 +66,7 @@ class Scenario():
     def update_agent_states(self, world):
         qb = world.agents[self.qb_index]
         # If QB is in the pocket, set their status as passing
-        qb.passing = self.check_in_box(self.pocket, qb.location)
+        qb.passing = self.check_in_box(self.pocket, qb.location) and qb.ballcarrier
         # Need to determine how QB decides who to pass to
         # Add catching, handoff, and fumble functions here to change ballcarrier
         # Check handoff
@@ -76,13 +76,24 @@ class Scenario():
             rb = world.agents[self.get_player_indices(world, ["RB"])[0]]
             rb.ballcarrier = True
             qb.ballcarrier = False
+        elif (world.play_type == "pass") and qb.passing and (world.timestep >= 0.5):
+            # Require 0.5 seconds to occur post-snap before throwing
+            self.passing(world, qb)
 
-    def passing(self,world):
+    def passing(self,world, qb):
         # Pseudocode for passing
-        # Select target
+        min_sep = 5 # Only throw to a receiver if they're at least 5 yards open
+        # Loop through agents
+        for agent in world.agents:
+            if agent.eligible:
+                # for each eligible receiver, calculate separation from nearest defender
+                separation = min([sum((agent.location - defender.location)**2) for defender in self.defensive_players(world)])**0.5
+                if separation > min_sep:
+                    agent.ballcarrier = True
+                    qb.ballcarrier = False
+                    break # Exit loop so QB can't throw the ball to multiple players
         # Use QB accuracy to determine where ball goes
         # Build receiving in here or as its own function?
-        pass
 
     def fumble(self, world):
         # Pseudocode for fumbles
@@ -218,9 +229,9 @@ class Scenario():
 
     def reward(self, agent, world):
         #Position-specific reward given at each timestep during a play (reward-shaping)
-        ballcarrier = [player for player in world.agents if player.ballcarrier][0]
-        if (ballcarrier.location[0] > world.yardline) and (agent.defense or agent.ballcarrier):
-            # If ballcarrier is past the line of scrimmage, return special ballcarrier and defense rewards
+        qb = world.agents[self.qb_index]
+        if ((not qb.ballcarrier) or (qb.location[0] > world.yardline)) and (agent.defense or agent.ballcarrier):
+            # Once QB hands-off, throws, or runs, return special ballcarrier and defense rewards
             if agent.defense:
                 return self.pursuit_reward(agent, world)
             elif agent.ballcarrier:
@@ -265,6 +276,7 @@ class Scenario():
             agent.defense = True if agent.position in ["DB","DL","LB"] else False
             position_counts[agent.position] = position_counts.get(agent.position, 0) + 1
             agent.index = f"{agent.position}_{position_counts[agent.position]}"
+            agent.eligible = True if agent.position in ["WR","TE","RB"] else False
 
     def load_playbook(self):
         #Each team has a JSON file containing all of their plays and formations
@@ -283,7 +295,7 @@ class Scenario():
             if team.defense:
                 play = team.def_playbook["sample_play"]
             else:
-                play = team.off_playbook["sample_play"]
+                play = team.off_playbook["pass_play"]
                 world.play_type = play["play_type"]
             for agent in world.agents:
                 if agent.team == team.name:
